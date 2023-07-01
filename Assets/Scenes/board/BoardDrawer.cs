@@ -40,25 +40,31 @@ public class BoardDrawer : MonoBehaviour
     }
 
 
-    public void CreatePieceObject(Piece piece)
+     public void CreatePieceObject(Piece piece)
     {
-        GameObject pieceObject = new GameObject(piece.symbol + ": " + piece.id);
-        pieceObject.transform.parent = transform.GetChild(1).transform;;
+
+        piece.gameObject =  generatePieceObject(transform.GetChild(1).transform,piece);
+    }
+
+    public GameObject generatePieceObject(Transform transform, Piece piece)
+    {
+        GameObject pieceObject = new GameObject(piece.pieceId);
+        pieceObject.transform.parent = transform;
         pieceObject.transform.localPosition = new Vector3(piece.pos.x * size + size/2f, -piece.pos.y * size - size/2f, -1);
        
         int numPolygonsToAdd = 3; // Number of polygons to add
         for (int i = 0; i < numPolygonsToAdd; i++)
         {
-            addPolygonToPieceObject(pieceObject,piece.pieceType.typeId+i);
+            addPolygonToPieceObject(pieceObject,piece.pieceTypeId.pieceTypeId+i,i);
         }
-        piece.gameObject =  pieceObject;
+        return pieceObject;
     }
 
-    private void addPolygonToPieceObject(GameObject pieceObject,string str)
+    private void addPolygonToPieceObject(GameObject pieceObject,string str, int z)
     {
         GameObject polygonObject = new GameObject("Polygon");
         polygonObject.transform.parent = pieceObject.transform;
-        polygonObject.transform.localPosition = Vector3.zero; // Set the position relative to the parent
+        polygonObject.transform.localPosition = new Vector3(0,0,-1-0.1f*z); // Set the position relative to the parent
 
         MeshFilter polygonMeshFilter = polygonObject.AddComponent<MeshFilter>();
         polygonMeshFilter.mesh = meshGenerator.GeneratePolygonMesh(6, str);
@@ -102,7 +108,7 @@ public class BoardDrawer : MonoBehaviour
         
         foreach (Pos pos in possibleMoves)
         {
-                possibleSquares.Add(createSquareObject("PossibleMove ("+pos.x+","+pos.y+")",transform.GetChild(0).transform, new Vector3(pos.x * size, -pos.y * size,-2.1f),color));
+                possibleSquares.Add(createSquareObject("PossibleMove ("+pos.x+","+pos.y+")",transform.GetChild(0).transform, new Vector3(pos.x * size, -pos.y * size,-10.1f),color));
         }
 
 
@@ -110,7 +116,7 @@ public class BoardDrawer : MonoBehaviour
 
     public void drawSelected(Pos piecePos, Material color){
 
-        selectedPiece = createSquareObject("PiecePos ("+piecePos.x+","+piecePos.y+")",transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size,-2.1f),color);
+        selectedPiece = createSquareObject("PiecePos ("+piecePos.x+","+piecePos.y+")",transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size,-10.1f),color);
     }
 
 

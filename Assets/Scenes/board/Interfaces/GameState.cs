@@ -35,11 +35,11 @@ public class GameState
         return pieces[i,j];
     }
 
-    public Piece getPieceById(string id)
+    public Piece getPieceById(string pieceId)
     {
         foreach (Piece piece in pieceList)
         {
-            if (piece != null && piece.id == id)
+            if (piece != null && piece.pieceId == pieceId)
             {
                 return piece;
             }

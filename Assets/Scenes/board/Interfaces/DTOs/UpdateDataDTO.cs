@@ -18,6 +18,7 @@ using UnityEngine;
         public string winner;
         public bool draw;
         public PieceDTO[] pieceDTOs;
+        public DrawEvent drawEvent;
 
     /*  
     public static UpdateDataDTO mockUpdateData1 = new UpdateDataDTO

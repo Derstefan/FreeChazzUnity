@@ -58,7 +58,7 @@ public class GameService
 
 
     //play draw
-    public static IEnumerator play(Vector2 from, Vector2 to)
+    public static IEnumerator play(Pos from, Pos to)
     {
         // Create a UnityWebRequest object
         UnityWebRequest request = UnityWebRequest.Get("http://127.0.0.1:8080/api/test/play/"+from.x+"/"+from.y+"/"+to.x+"/"+to.y+"/");

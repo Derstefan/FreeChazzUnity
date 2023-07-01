@@ -22,8 +22,7 @@ public class GameManager : MonoBehaviour
     //Frontend State
 
     
-    private int selectedX = -1; //-1,-1 means there is no selection
-    private int selectedY = -1;
+    private Piece selectedPiece;
     private List<Vector2> possibleMoves = new List<Vector2>();
 
 
@@ -34,25 +33,26 @@ public class GameManager : MonoBehaviour
     //technical stuff
     
     public GameObject chessboard;
-    public Material lightSquareMaterial;
-    public Material darkSquareMaterial; 
-    public Material green;
-    public Material red; 
     public GameObject pieceView;
+    public GameObject configObject;
+
+
+    private Config config;
     private float size;
     private int width;
     private int height;
 
     private BoardDrawer drawer;
+    private bool initialLoaded = false;
 
 
 
     private float timer = 0.0f;
-    private float interval = 2.5f; // 200ms
-
+    private float interval = 0.5f; 
 
     void Start()
     {
+        config = configObject.GetComponent<Config>();
        StartCoroutine(GameService.createGame(createGame));
     }
 
@@ -60,9 +60,11 @@ public class GameManager : MonoBehaviour
     //first load of data
     void createGame(UpdateDataDTO updateDataDTO){
 
-    if(updateDataDTO==null){
-        Debug.Log("no connection");
-    }
+        if(updateDataDTO==null){
+            Debug.Log("no connection");
+            initialLoaded=false;
+        }
+        initialLoaded = true;
 
         width = updateDataDTO.width;
         height = updateDataDTO.height;
@@ -97,7 +99,9 @@ public class GameManager : MonoBehaviour
 
         if (timer >= interval)
         {
-            StartCoroutine(GameService.checkUpdate(gameState.turn+1,UpdateMatchData));
+            if(initialLoaded){
+                StartCoroutine(GameService.checkUpdate(gameState.turn+1,UpdateMatchData));
+            }
             timer = 0.0f; // Reset the timer
         }
     }
@@ -115,44 +119,83 @@ private void UpdateMatchData(UpdateDataDTO updateData)
     gameState.nextTurn = updateData.nextTurn;
     
     
+    
     List<Piece> piecesToDestroy = new List<Piece>();
     List<Piece> piecesToAdd = new List<Piece>();
 
+
+
+    foreach (Piece p in gameState.pieceList)
+    {
+        if(getPieceDTOById(p.pieceId,updateData.pieceDTOs)==null){
+            piecesToDestroy.Add(p);
+        }
+    }
+
+    foreach (Piece p in piecesToDestroy)
+    {
+        destroy(p);
+    }
+
     foreach (PieceDTO pDTO in updateData.pieceDTOs)
     {
-        Piece existingPiece = gameState.getPieceById(pDTO.id);
+        Piece existingPiece = gameState.getPieceById(pDTO.pieceId);
         if (existingPiece != null)
         {
+            //Update Piece values
             if(!existingPiece.pos.equals(pDTO.pos)){
                 movePiece(existingPiece,pDTO.pos);
-            }else {
-                //case no change
             }
+
+            existingPiece.possibleMoves = pDTO.possibleMoves;
         }
         else
         {
             piecesToAdd.Add(new Piece(pDTO));
         }
     }
-
-    foreach (Piece p in gameState.pieceList)
-    {
-        if(getPieceDTOById(p.id,updateData.pieceDTOs)==null){
-            piecesToDestroy.Add(p);
-        }
-    }
-
-
+    
     foreach (Piece p in piecesToAdd)
     {
         addPiece(p);
     }
-    foreach (Piece p in piecesToDestroy)
-    {
-        destroy(p);
-    }
+
+
 
 }
+
+
+    // this put all positions an possibleMoves
+    private void loadPieces(List<PieceDTO> pieceDTOs){
+
+    }
+
+    private void doDrawEvents(){
+        //Events...
+        //
+    }
+
+    private void doSwapEvent(){
+
+    }
+
+    private void doMoveEvent(){
+
+    }
+
+    private void doDestroyEvent(){
+
+    }
+
+    private void doChangeOwnerEvent(){
+
+    }
+
+    private void doChangeTypeEvent(){
+
+    }
+
+
 
 
 
@@ -162,35 +205,37 @@ private void UpdateMatchData(UpdateDataDTO updateData)
         gameState.addPiece(p);
         
         drawer.CreatePieceObject(p);
-       // Debug.Log("added Piece " + p.id + " to (" + p.pos.x +","+ p.pos.y+")");
+        //Debug.Log("added Piece " + p.pieceId + " to (" + p.pos.x +","+ p.pos.y+")");
     }
 
     private void movePiece(Piece p, Pos pos){
         gameState.movePiece(p,pos);
 
         p.gameObject.transform.localPosition = new Vector3(p.pos.x * size + size/2f, -p.pos.y * size - size/2f, -1);
-       // Debug.Log("moved Piece " + p.id + " to (" + pos.x +","+pos.y+")");
+        //Debug.Log("moved Piece " + p.pieceId + " to (" + pos.x +","+pos.y+")");
     }
 
     private void destroy(Piece p){
-        gameState.destroy(p);
+        
+       DestroyDrawer.startDestroyAnimation(p.gameObject);
+       gameState.destroy(p);
 
         Destroy(p.gameObject);
-       // Debug.Log("destroyed Piece " + p.id);
+        //Debug.Log("destroyed Piece " + p.pieceTypeId.pieceTypeId);
     }
 
 
-private PieceDTO getPieceDTOById(string id, PieceDTO[] pDTOs)
-{
-    foreach (PieceDTO pDTO in pDTOs)
+    private PieceDTO getPieceDTOById(string pieceId, PieceDTO[] pDTOs)
     {
-        if (pDTO != null && pDTO.id == id)
+        foreach (PieceDTO pDTO in pDTOs)
         {
-            return pDTO;
+            if (pDTO != null && pDTO.pieceId == pieceId)
+            {
+                return pDTO;
+            }
         }
+        return null;
     }
-    return null;
-}
 
 
 
@@ -200,35 +245,33 @@ private PieceDTO getPieceDTOById(string id, PieceDTO[] pDTOs)
     {
             
         if(isPossibleMove(x,y)) {
+            Debug.Log("possible move " + x + "," +y);
             drawer.removePossibleMoves();
             drawer.removeSelected();
-            StartCoroutine(GameService.play(new Vector2(selectedX,selectedY),new Vector2(x,y)));
-            selectedX = -1;
-            selectedY = -1;
+            StartCoroutine(GameService.play(selectedPiece.pos,new Pos(x,y)));
+            selectedPiece = null;
         }
         else if(gameState.pieces[x,y]!=null){
-            selectedX = x;
-            selectedY = y;
+            Debug.Log("piece at " + x + "," +y);
+            selectedPiece = gameState.pieces[x,y];
             drawer.removePossibleMoves();
             drawer.removeSelected();
-            bool isOwner = gameState.pieces[x,y].owner==gameState.nextTurn;
-            drawer.drawPossibleMoves(gameState.pieces[x,y].possibleMoves,isOwner?green:red);
-            drawer.drawSelected(new Pos(selectedX,selectedY),isOwner?green:red);
+            bool isOwner = selectedPiece.owner==gameState.nextTurn;
+            drawer.drawPossibleMoves(selectedPiece.possibleMoves,isOwner?config.green:config.red);
+            drawer.drawSelected(selectedPiece.pos,isOwner?config.green:config.red);
         }
         else {
+            Debug.Log("unselect " + x + "," +y);
             drawer.removePossibleMoves();
             drawer.removeSelected();
-            selectedX = -1;
-            selectedY = -1;
+            selectedPiece = null;
         }
     }
 
     private bool isPossibleMove(int x,int y){
-        if(selectedX==-1 && selectedY==-1)return false;
-        if(gameState.pieces[selectedX, selectedY]==null)Debug.Log("is null");
-        Pos[] possibleMoves = gameState.pieces[selectedX, selectedY].possibleMoves;
-
-        foreach (Pos pos in gameState.pieces[selectedX, selectedY].possibleMoves)
+        if(selectedPiece==null)return false;
+        Pos[] possibleMoves = selectedPiece.possibleMoves;
+        foreach (Pos pos in selectedPiece.possibleMoves)
         {
             if(pos.x==x && pos.y==y){
                 return true;
@@ -240,11 +283,14 @@ private PieceDTO getPieceDTOById(string id, PieceDTO[] pDTOs)
 
 
 
+  
+
+
     //-------------------------------------rest-----------------------------------
 
 
     void drawChessboard(){
-        drawer.CreateChessboard(lightSquareMaterial, darkSquareMaterial);
+        drawer.CreateChessboard(config.lightSquareMaterial, config.darkSquareMaterial);
     }
 
 

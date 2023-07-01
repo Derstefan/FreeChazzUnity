@@ -5,8 +5,10 @@ using UnityEngine;
 
 public class Piece
 {
-    public string id;
-    public PieceTypeDTO pieceType;
+    public string pieceId;
+        //PieceTypeData
+    public PieceTypeId pieceTypeId;
+
     public Pos pos;
     public string symbol;
     public Pos[] possibleMoves;
@@ -17,8 +19,8 @@ public class Piece
 
     public Piece(PieceDTO pieceDTO)
     {
-        id = pieceDTO.id;
-        pieceType = pieceDTO.pieceType;
+        pieceId = pieceDTO.pieceId;
+        pieceTypeId = pieceDTO.pieceTypeId;
         pos = pieceDTO.pos;
         symbol = pieceDTO.symbol;
         possibleMoves = pieceDTO.possibleMoves;
