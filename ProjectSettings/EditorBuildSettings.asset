@@ -9,7 +9,10 @@ EditorBuildSettings:
     path: Assets/Scenes/Menu.unity
     guid: db68893febe2c7d438ecac41a6017c48
   - enabled: 1
-    path: Assets/Scenes/board.unity
+    path: Assets/Scenes/Match.unity
     guid: 97cd8957caae0334ea09a8b03c564220
+  - enabled: 1
+    path: Assets/Scenes/TestGen.unity
+    guid: 11b9d8daf4bf9c047be86d8b8532f909
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
