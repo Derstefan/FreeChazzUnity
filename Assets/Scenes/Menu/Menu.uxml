@@ -2,6 +2,7 @@
     <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
         <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
             <ui:Button text="startTestGame" display-tooltip-when-elided="true" name="start" />
+            <ui:Button text="start Bot Game" display-tooltip-when-elided="true" name="startBot" />
             <ui:Button text="PieceGenerator" display-tooltip-when-elided="true" name="generator" />
             <ui:Button text="Quit" display-tooltip-when-elided="true" name="quit" />
         </ui:VisualElement>

@@ -55,8 +55,8 @@ public class GridRenderer : MonoBehaviour
 
 
 
-    private static Color getColorByType(string type)
-    {
+    public static Color getColorByType(string type)
+    {         
         switch (type)
         {
             case "F":

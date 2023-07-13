@@ -11,7 +11,7 @@ public class PieceDTO
 
     public Pos pos;
     public string symbol;
-    public Pos[] possibleMoves;
+    public MoveSet moveSet;
     public string owner;
 
 }

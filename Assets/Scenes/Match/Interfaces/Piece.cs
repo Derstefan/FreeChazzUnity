@@ -11,7 +11,7 @@ public class Piece
 
     public Pos pos;
     public string symbol;
-    public Pos[] possibleMoves;
+    public MoveSet moveSet;
     public string owner;
 
     public GameObject gameObject;
@@ -23,7 +23,7 @@ public class Piece
         pieceTypeId = pieceDTO.pieceTypeId;
         pos = pieceDTO.pos;
         symbol = pieceDTO.symbol;
-        possibleMoves = pieceDTO.possibleMoves;
+        moveSet = pieceDTO.moveSet;
         owner = pieceDTO.owner;
     }
 

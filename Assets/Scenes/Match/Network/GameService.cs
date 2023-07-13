@@ -9,10 +9,10 @@ public class GameService
 
 
     //create Game
-    public static IEnumerator createGame(Action<UpdateDataDTO> callback)
+    public static IEnumerator createGame(bool isHotSeat,Action<UpdateDataDTO> callback)
     {
         // Create a UnityWebRequest object
-        UnityWebRequest request = UnityWebRequest.Get("http://127.0.0.1:8080/api/test/newgame");
+        UnityWebRequest request = UnityWebRequest.Get(isHotSeat ? "http://127.0.0.1:8080/api/test/newgame": "http://127.0.0.1:8080/api/test/newbotgame");
 
         // Send the request and wait for a response
         yield return request.SendWebRequest();
@@ -51,7 +51,7 @@ public class GameService
             UpdateDataDTO updateData = JsonUtility.FromJson<UpdateDataDTO>(request.downloadHandler.text);
             if (updateData.drawEvent != null)
             {
-                Debug.Log(JsonUtility.ToJson(updateData.drawEvent));
+                //Debug.Log(JsonUtility.ToJson(updateData.drawEvent));
             }
             callback(updateData);
         }
@@ -82,7 +82,7 @@ public class GameService
 
 
     //play draw
-    public static IEnumerator play(Pos from, Pos to)
+    public static IEnumerator play(Pos from, Pos to, Action<UpdateDataDTO> callback)
     {
         // Create a UnityWebRequest object
         UnityWebRequest request = UnityWebRequest.Get("http://127.0.0.1:8080/api/test/play/"+from.x+"/"+from.y+"/"+to.x+"/"+to.y+"/");
@@ -97,7 +97,12 @@ public class GameService
         }
         else
         {
-            //TODO: update directly ?
+            UpdateDataDTO updateData = JsonUtility.FromJson<UpdateDataDTO>(request.downloadHandler.text);
+            if (updateData.drawEvent != null)
+            {
+                Debug.Log(JsonUtility.ToJson(updateData.drawEvent));
+            }
+            callback(updateData);
         }
     }
 

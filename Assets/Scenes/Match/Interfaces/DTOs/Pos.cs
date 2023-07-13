@@ -9,6 +9,7 @@ public class Pos
 {
     public int x;
     public int y;
+    public string tag;
 
     public Pos(int x, int y)
     {
@@ -18,6 +19,11 @@ public class Pos
         public bool equals(Pos other)
     {
         return this.x == other.x && this.y == other.y;
+    }
+
+    public Pos invertY()
+    {
+        return new Pos(x, -y);
     }
 
         public Vector2 GetVector2()

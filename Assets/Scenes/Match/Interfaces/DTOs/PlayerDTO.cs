@@ -6,10 +6,10 @@ using UnityEngine;
 [Serializable]
 public class PlayerDTO
 {
-    public string PlayerId;
-    public string Name;
-    public string PlayerType;
-    public bool IsPlayedByBot;
-    public bool IsRealPlayer;
+    public string playerId;
+    public string name;
+    public string playerType;
+    public bool isPlayedByBot;
+    public bool isRealPlayer;
 }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -11,6 +12,7 @@ public class GameManager : MonoBehaviour
 
     //data about the game
     private string gameId;
+    private string playerType;//for hotseat
 
     // Gamestate
     private GameState gameState;
@@ -19,7 +21,8 @@ public class GameManager : MonoBehaviour
 
 
     private Piece selectedPiece;
-    private List<Vector2> possibleMoves = new List<Vector2>();
+    private Piece mouseOverPiece;
+
 
     //cached data
     private CachedStore cachedStore = new CachedStore();
@@ -32,30 +35,35 @@ public class GameManager : MonoBehaviour
     //technical stuff
 
     private Config config;
-    private float size;
-    private int width;
-    private int height;
+    public float size;
+    public int width;
+    public int height;
     private float timer = 0.0f;
     private float interval = 0.5f;
 
     private bool initialLoaded = false;
+    private bool isUpdating = true;
+
+    private float mouseX = 0;
+    private float mouseY = 0;
 
     //View
     public GameObject chessboard;
     public GameObject pieceView;
     public GameObject configObject;
 
-    private BoardDrawer drawer;
+    private BoardRenderer boardRenderer;
     private PieceViewRenderer pieceViewRenderer;
 
-
+    private bool isAnimating = false;
+    private Animator animator = null;
 
     
 
     void Start()
     {
         config = configObject.GetComponent<Config>();
-        StartCoroutine(GameService.createGame(initGame));
+        StartCoroutine(GameService.createGame(Params.isHotSeat,initGame));
     }
 
     //first load of data
@@ -66,18 +74,24 @@ public class GameManager : MonoBehaviour
             Debug.Log("no connection");
             initialLoaded = false;
         }
-        initialLoaded = true;
         width = updateDataDTO.width;
         height = updateDataDTO.height;
         size = config.maxBoardSize / (float)height;
 
         gameState = new GameState(width, height);
 
-        drawer = new BoardDrawer(chessboard.transform, width, height, size);
+        boardRenderer = new BoardRenderer(chessboard.transform, width, height, size, updateDataDTO.player1.playerType);
+ 
+
         pieceViewRenderer = new PieceViewRenderer(pieceView.transform);
 
+        initialLoaded = true;
+
         drawChessboard();
-        UpdateMatchData(updateDataDTO);
+        gameState.turn = updateDataDTO.turn;
+        gameState.nextTurn = updateDataDTO.nextTurn;
+        playerType = updateDataDTO.player1.playerType;//TODO: change it for network play
+        updatePieces(updateDataDTO.pieceDTOs);
         loadPieceTypes();
     }
 
@@ -93,27 +107,64 @@ public class GameManager : MonoBehaviour
                 click(i, j);
             }
         }
-        
-        // check for updates
-        timer += Time.deltaTime;
-        if (timer >= interval)
+
+        //check mousemove
+        if(mouseX!=Input.mousePosition.x || mouseY!=Input.mousePosition.y && initialLoaded)
         {
-            if (initialLoaded)
+            mouseX = Input.mousePosition.x;
+            mouseY = Input.mousePosition.y;
+
+            int i,j;
+            if (TryGetGridPosition(out i, out j))
+            {
+                mouseMove(i, j);
+            }
+        }
+
+        // check for updates
+        if (initialLoaded && isUpdating && !isAnimating)
+        {
+            timer += Time.deltaTime;
+            if (timer >= interval)
             {
                 StartCoroutine(GameService.checkUpdate(gameState.turn + 1, UpdateMatchData));
+                timer = 0.0f; // Reset the timer
             }
-            timer = 0.0f; // Reset the timer
+        }
+
+        // animate
+        if (isAnimating)
+        {
+            bool finished = animator.animate(Time.deltaTime);
+            if (finished)
+            {
+                Debug.Log("animation finished");
+                updatePieces(animator.pieceDTOsAfterEvent);
+                isAnimating = false;
+                animator = null;
+            }
         }
     }
 
     private void UpdateMatchData(UpdateDataDTO updateData)
     {
-        if (updateData.pieceDTOs == null || updateData.pieceDTOs.Length == 0)
+        if (updateData.winner != "")
+        {
+            Debug.Log("winner is " + updateData.winner);
+        }
+
+        if (updateData.pieceDTOs == null || updateData.pieceDTOs.Length == 0 || isAnimating)
         {
             return;
         }
 
+        
+
         //Debug.Log(" ------------------------------ new Board Update turn:" + updateData.turn);
+        if(gameState.turn +1== updateData.turn && updateData.drawEvent != null)
+        {
+            startAnimation(updateData.drawEvent, updateData.pieceDTOs);
+        } 
         gameState.turn = updateData.turn;
         if (gameState.turn > gameState.maxTurns)
         {
@@ -122,20 +173,23 @@ public class GameManager : MonoBehaviour
         gameState.nextTurn = updateData.nextTurn;
 
 
-        if(updateData.drawEvent!=null)
-        {
-            Debug.Log(JsonUtility.ToJson(updateData.drawEvent));
-        }
 
-        //TODO move somewhere else
-        loadPieces(updateData.pieceDTOs);
         
+    }
+
+    private void startAnimation(DrawEventDTO drawEventDTO,PieceDTO[] pieceDTOsAfterEvent)
+    {        
+        Debug.Log("startAnimation");
+        
+        animator = new Animator(drawEventDTO, pieceDTOsAfterEvent, this);
+        isAnimating = true;
+
     }
 
 
 
     // this put all positions an possibleMoves
-    private void loadPieces(PieceDTO[] pieceDTOs)
+    private void updatePieces(PieceDTO[] pieceDTOs)
     {
         List<Piece> piecesToDestroy = new List<Piece>();
         List<Piece> piecesToAdd = new List<Piece>();
@@ -164,7 +218,7 @@ public class GameManager : MonoBehaviour
                     movePiece(existingPiece, pDTO.pos);
                 }
 
-                existingPiece.possibleMoves = pDTO.possibleMoves;
+                existingPiece.moveSet = pDTO.moveSet;
             }
             else
             {
@@ -177,7 +231,6 @@ public class GameManager : MonoBehaviour
             addPiece(p);
         }
     }
-
 
     private void loadPieceTypes()
     {
@@ -199,28 +252,11 @@ public class GameManager : MonoBehaviour
     }
 
 
-    private void doDrawEvents()
-    {
-        //Events...
-        //
-    }
-
-    private void doSwapEvent() { }
-
-    private void doMoveEvent() { }
-
-    private void doDestroyEvent() { }
-
-    private void doChangeOwnerEvent() { }
-
-    private void doChangeTypeEvent() { }
-
     private void addPiece(Piece p)
     {
         gameState.addPiece(p);
 
-        drawer.CreateAndConnectGameObject(p);
-        //Debug.Log("added Piece " + p.pieceId + " to (" + p.pos.x +","+ p.pos.y+")");
+        boardRenderer.CreateAndConnectGameObject(p);
     }
 
     private void movePiece(Piece p, Pos pos)
@@ -232,16 +268,12 @@ public class GameManager : MonoBehaviour
             -p.pos.y * size - size / 2f,
             -1
         );
-        //Debug.Log("moved Piece " + p.pieceId + " to (" + pos.x +","+pos.y+")");
     }
 
     private void destroy(Piece p)
     {
-        DestroyDrawer.startDestroyAnimation(p.gameObject, 1.4f, 3.0f);
         gameState.destroy(p);
-
         Destroy(p.gameObject);
-        //Debug.Log("destroyed Piece " + p.pieceTypeId.pieceTypeId);
     }
 
 
@@ -262,25 +294,25 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
+
     private void play(int x, int y)
     {
-        drawer.removePossibleMoves();
-        drawer.removeSelected();
-        StartCoroutine(GameService.play(selectedPiece.pos, new Pos(x, y)));
+        boardRenderer.removePossibleMoves();
+        boardRenderer.removeSelected();
+        StartCoroutine(GameService.play(selectedPiece.pos, new Pos(x, y), UpdateMatchData));
         unselectPiece(x, y);
     }
 
     private void selectPiece(int x, int y)
     {
         selectedPiece = gameState.pieces[x, y];
-        drawer.removePossibleMoves();
-        drawer.removeSelected();
-        bool isOwner = selectedPiece.owner == gameState.nextTurn;
-        drawer.drawPossibleMoves(
-            selectedPiece.possibleMoves,
-            isOwner ? config.green : config.red
-        );
-        drawer.drawSelected(selectedPiece.pos, isOwner ? config.green : config.red);
+        boardRenderer.removePossibleMoves();
+        boardRenderer.removeSelected();
+        bool isOwner = selectedPiece.owner == playerTurn();
+        boardRenderer.drawPossibleMoves(
+            selectedPiece.moveSet,isOwner);
+        boardRenderer.drawSelected(selectedPiece.pos,isOwner);
 
         //check if pieceType needs to load
         if (cachedStore.GetPieceTypeDTO(selectedPiece.pieceTypeId) == null)
@@ -293,18 +325,77 @@ public class GameManager : MonoBehaviour
 
     private void unselectPiece(int x,int y)
     {
-        drawer.removePossibleMoves();
-        drawer.removeSelected();
+        boardRenderer.removePossibleMoves();
+        boardRenderer.removeSelected();
         pieceViewRenderer.hide();
         selectedPiece = null;
+    }
+
+
+    private void mouseMove(int x, int y)
+    {
+        if (gameState.pieces[x, y] != null)
+        {
+            mouseEnterPiece(x, y);
+        }
+        else
+        {
+            mouseLeavePiece(x, y);
+        }
+    }
+
+
+
+
+    private void mouseEnterPiece(int x, int y)
+    {
+        mouseOverPiece = gameState.pieces[x, y];
+        boardRenderer.removeMouseOverPossibleMoves();
+        boardRenderer.removeMouseOverSelected();
+        bool isOwner = mouseOverPiece.owner == playerTurn();
+       
+        boardRenderer.drawMouseOverPossibleMoves(
+            mouseOverPiece.moveSet,
+            isOwner ? config.green : config.red
+        );
+        boardRenderer.drawMouseOverSelected(mouseOverPiece.pos, isOwner ? config.green : config.red);
+    }
+
+    private string playerTurn()
+    {
+        if (Params.isHotSeat)
+        {
+            return gameState.nextTurn;
+        }
+        return playerType;
+    }
+
+    private void mouseLeavePiece(int x, int y)
+    {
+        boardRenderer.removeMouseOverPossibleMoves();
+        boardRenderer.removeMouseOverSelected();
+        mouseOverPiece = null;
     }
 
     private bool isPossibleMove(int x, int y)
     {
         if (selectedPiece == null)
+        {
+            Debug.Log("selectedPiece == null");
             return false;
-        Pos[] possibleMoves = selectedPiece.possibleMoves;
-        foreach (Pos pos in selectedPiece.possibleMoves)
+        }
+        if (selectedPiece.moveSet == null)
+        {
+            Debug.Log("selectedPiece.moveSet == null");
+            return false;
+        }
+        if (selectedPiece.moveSet.possibleMoves == null)
+        {
+            Debug.Log("selectedPiece.moveSet.possibleMoves == null");
+            return false;
+        }
+
+        foreach (Pos pos in selectedPiece.moveSet.possibleMoves)
         {
             if (pos.x == x && pos.y == y)
             {
@@ -320,7 +411,7 @@ public class GameManager : MonoBehaviour
 
     void drawChessboard()
     {
-        drawer.CreateChessboard(config.lightSquareMaterial, config.darkSquareMaterial);
+        boardRenderer.CreateChessboard(config.lightSquareMaterial, config.darkSquareMaterial);
     }
 
     private bool TryGetGridPosition(out int i, out int j)
@@ -337,4 +428,30 @@ public class GameManager : MonoBehaviour
             return false;
         }
     }
+
+
+
+
+
+
+
+    // ------------------------------- GETTER ----------------------------------
+
+    public Piece getPieceById(string pieceId)
+    {
+        for (int i = 0; i < gameState.pieceList.Count; i++)
+        {
+            Piece piece = gameState.pieceList[i];
+            if (piece.pieceId == pieceId) { 
+                return piece;
+            }
+        }
+        return null;
+    }
+
+    public Piece getPieceByPos(Pos pos)
+    {
+        return gameState.pieces[pos.x, pos.y];
+    }
+    
 }
