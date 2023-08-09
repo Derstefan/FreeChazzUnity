@@ -1,12 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class BoardRenderer : MonoBehaviour 
 {
 
-    public Mesh mesh;
+    private Mesh mesh;
+    private Mesh meshSmall;
+    private float smallScale = 0.6f;
+
 
     private Transform transform { get; set; }
     private float size { get; set; }
@@ -35,6 +39,7 @@ public class BoardRenderer : MonoBehaviour
         this.width = width;
         this.height = height;
         this.mesh = createSquare();
+        this.meshSmall = createSquareSmall();
         this.player = player;
 
         this.aura1 = createOwnerAura(size, Color.black);
@@ -110,13 +115,13 @@ public class BoardRenderer : MonoBehaviour
     {
         foreach (Pos pos in moveSet.possibleMoves)
         {
-                possibleSquares.Add(createSquareObject("PossibleMove ("+pos.x+","+pos.y+")",transform.GetChild(0).transform, new Vector3(pos.x * size, -pos.y * size,-10.1f),pos.tag));
+                possibleSquares.Add(createPossibleMoveSquare("PossibleMove ("+pos.x+","+pos.y+")",transform.GetChild(0).transform, new Vector3(pos.x * size, -pos.y * size,-10.1f),pos.tag, isOwner));
         }
     }
 
     public void drawSelected(Pos piecePos, bool isOwner)
     {
-        selectedPiece = createSquareObject("PiecePos ("+piecePos.x+","+piecePos.y+")",transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size,-10.1f),piecePos.tag);
+        selectedPiece = createPossibleMoveSquare("PiecePos ("+piecePos.x+","+piecePos.y+")",transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size,-10.1f),piecePos.tag, isOwner);
     }
 
     public void removePossibleMoves(){
@@ -137,13 +142,13 @@ public class BoardRenderer : MonoBehaviour
     {
         foreach (Pos pos in moveSet.possibleMoves)
         {
-            mouseOverpossibleSquares.Add(createSquareObject("PossibleMove (" + pos.x + "," + pos.y + ")", transform.GetChild(0).transform, new Vector3(pos.x * size, -pos.y * size, -10.1f), pos.tag));
+            mouseOverpossibleSquares.Add(createPossibleMoveSquare("PossibleMove (" + pos.x + "," + pos.y + ")", transform.GetChild(0).transform, new Vector3(pos.x * size, -pos.y * size, -10.1f), pos.tag, isOwner));
         }
     }
 
     public void drawMouseOverSelected(Pos piecePos, bool isOwner)
     {
-        mouseOverPiece = createSquareObject("PiecePos (" + piecePos.x + "," + piecePos.y + ")", transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size, -10.1f), piecePos.tag);
+        mouseOverPiece = createPossibleMoveSquare("PiecePos (" + piecePos.x + "," + piecePos.y + ")", transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size, -10.1f), piecePos.tag, isOwner);
     }
 
     public void removeMouseOverPossibleMoves()
@@ -162,7 +167,42 @@ public class BoardRenderer : MonoBehaviour
 
 
 
-    private GameObject createSquareObject(string name,Transform parent,Vector3 position,string type){
+
+    private GameObject createPossibleMoveSquare(string name, Transform parent, Vector3 position, string type, bool isOwner)
+    {
+        GameObject parentSquare = new GameObject(name);
+        parentSquare.transform.parent = parent;
+        parentSquare.transform.localPosition = position;
+
+
+        //actioncolor square
+        GameObject square = new GameObject(name);
+        square.transform.parent = parentSquare.transform;
+        square.transform.localPosition = new Vector3((1f-smallScale)*size*0.5f,-(1f - smallScale)*size * 0.5f,-20f);
+
+        MeshFilter meshFilter = square.AddComponent<MeshFilter>();
+        MeshRenderer meshRenderer = square.AddComponent<MeshRenderer>();
+
+        meshFilter.mesh = meshSmall;
+        meshRenderer.material = RenderUtil.getMaterialByType(type);
+
+
+        GameObject square2 = new GameObject(name);
+        square2.transform.parent = parentSquare.transform;
+        square2.transform.localPosition = Vector3.zero;
+
+        MeshFilter meshFilter2 = square2.AddComponent<MeshFilter>();
+        MeshRenderer meshRenderer2 = square2.AddComponent<MeshRenderer>();
+
+        meshFilter2.mesh = mesh;
+        meshRenderer2.material = isOwner?RenderUtil.green:RenderUtil.red;
+
+        return parentSquare;
+
+    }
+
+    private GameObject createSquareObject(string name,Transform parent,Vector3 position,string type)
+    {
                 GameObject square = new GameObject(name);
                 square.transform.parent = parent;
                 square.transform.localPosition = position;
@@ -172,9 +212,9 @@ public class BoardRenderer : MonoBehaviour
 
                 meshFilter.mesh = mesh;
                 meshRenderer.material = RenderUtil.getMaterialByType(type);
-                Debug.Log(type);
                 return square;
     }
+
 
     private Mesh createSquare()
     {
@@ -185,6 +225,22 @@ public class BoardRenderer : MonoBehaviour
             new Vector3(0, -1f*size,0),
             new Vector3(1f*size, -1f*size,0),
             new Vector3(1f*size, 0,0),
+        };
+        mesh.triangles = new int[] { 0, 1, 2, 0, 2, 3 };
+        mesh.normals = new Vector3[] { Vector3.up, Vector3.up, Vector3.up, Vector3.up };
+        return mesh;
+    }
+
+    private Mesh createSquareSmall()
+    {
+        
+        Mesh mesh = new Mesh();
+        mesh.vertices = new Vector3[]
+        {
+            new Vector3(0, 0, 0),
+            new Vector3(0, -1f*size*smallScale,0),
+            new Vector3(1f*size * smallScale, -1f*size * smallScale,0),
+            new Vector3(1f*size * smallScale, 0,0),
         };
         mesh.triangles = new int[] { 0, 1, 2, 0, 2, 3 };
         mesh.normals = new Vector3[] { Vector3.up, Vector3.up, Vector3.up, Vector3.up };

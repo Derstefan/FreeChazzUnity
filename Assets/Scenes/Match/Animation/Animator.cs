@@ -18,14 +18,11 @@ using UnityEngine;
         this.animations = new List<Animation>();
         for (int i = 0; i < drawEventDTO.events.Length; i++)
         {
-              //create animation for each event
+              //create animation for each event 
               EventDTO eventDTO = drawEventDTO.events[i];
             switch (eventDTO.type)
             {
                 case "MOVE":
-                    
-                   
-
                     animations.Add(new MovementAnimation(gameManager.getPieceById(eventDTO.pieceId),
                         (eventDTO.fromPos.invertY().GetVector2() + new Vector2(0.5f, -0.5f)) * gameManager.size,
                         (eventDTO.toPos.invertY().GetVector2() + new Vector2(0.5f, -0.5f)) * gameManager.size));
@@ -34,10 +31,7 @@ using UnityEngine;
                     animations.Add(new DestroyAnimation(gameManager.getPieceById(eventDTO.pieceId)));
                     break;
                 case "SWAP":
-                    animations.Add(new SwapAnimation(gameManager.getPieceByPos(eventDTO.fromPos),
-                        (eventDTO.fromPos.invertY().GetVector2() + new Vector2(0.5f, -0.5f)) * gameManager.size,
-                        (eventDTO.toPos.invertY().GetVector2() + new Vector2(0.5f, -0.5f)) * gameManager.size,
-                         gameManager.getPieceByPos(eventDTO.toPos)));
+                    animations.Add(new SwapAnimation(gameManager, eventDTO));
                     break;
                 case "MOVEANDDESTROY":
                     animations.Add(new MoveAndDestroyAnimation(gameManager.getPieceById(eventDTO.pieceId),
@@ -53,16 +47,14 @@ using UnityEngine;
             }
 
         }
-       
         }
 
         public bool animate(float delta)
         {
             if (currentAnimationIndex >= animations.Count)
-            {
-                
+            {    
                 return true; //Animations finished
-        }
+            }
             Animation animation = animations[currentAnimationIndex];
             
        

@@ -189,14 +189,15 @@ public class GameManager : MonoBehaviour
 
 
     // this put all positions an possibleMoves
-    private void updatePieces(PieceDTO[] pieceDTOs)
+    private void updatePieces(PieceDTO[] newPieceDTOs)
     {
         List<Piece> piecesToDestroy = new List<Piece>();
         List<Piece> piecesToAdd = new List<Piece>();
+        List<Piece> piecesToMove = new List<Piece>();
 
         foreach (Piece p in gameState.pieceList)
         {
-            if (Util.getPieceDTOById(p.pieceId, pieceDTOs) == null)
+            if (Util.getPieceDTOById(p.pieceId, newPieceDTOs) == null)
             {
                 piecesToDestroy.Add(p);
             }
@@ -207,7 +208,7 @@ public class GameManager : MonoBehaviour
             destroy(p);
         }
 
-        foreach (PieceDTO pDTO in pieceDTOs)
+        foreach (PieceDTO pDTO in newPieceDTOs)
         {
             Piece existingPiece = gameState.getPieceById(pDTO.pieceId);
             if (existingPiece != null)
@@ -215,7 +216,8 @@ public class GameManager : MonoBehaviour
                 //Update Piece values
                 if (!existingPiece.pos.equals(pDTO.pos))
                 {
-                    movePiece(existingPiece, pDTO.pos);
+                    existingPiece.pos = pDTO.pos;
+                    piecesToMove.Add(existingPiece);
                 }
 
                 existingPiece.moveSet = pDTO.moveSet;
@@ -224,6 +226,11 @@ public class GameManager : MonoBehaviour
             {
                 piecesToAdd.Add(new Piece(pDTO));
             }
+        }
+
+        foreach (Piece p in piecesToMove)
+        {
+            movePiece(p, p.pos);
         }
 
         foreach (Piece p in piecesToAdd)
@@ -306,6 +313,7 @@ public class GameManager : MonoBehaviour
 
     private void selectPiece(int x, int y)
     {
+        Debug.Log("selectPiece");
         selectedPiece = gameState.pieces[x, y];
         boardRenderer.removePossibleMoves();
         boardRenderer.removeSelected();
@@ -356,9 +364,9 @@ public class GameManager : MonoBehaviour
        
         boardRenderer.drawMouseOverPossibleMoves(
             mouseOverPiece.moveSet,
-            isOwner ? config.green : config.red
+            isOwner
         );
-        boardRenderer.drawMouseOverSelected(mouseOverPiece.pos, isOwner ? config.green : config.red);
+        boardRenderer.drawMouseOverSelected(mouseOverPiece.pos, isOwner);
     }
 
     private string playerTurn()

@@ -42,7 +42,7 @@ public class GridRenderer : MonoBehaviour
 
         GameObject cell = GameObject.CreatePrimitive(PrimitiveType.Quad);
         cell.transform.position = cellPosition;
-        cell.transform.localScale = new Vector3(cellSize, cellSize, 1f);
+        cell.transform.localScale = new Vector3(cellSize*0.8f, cellSize*0.8f, 1f);
 
         Renderer cellRenderer = cell.GetComponent<Renderer>();
         cellRenderer.material.color = color;

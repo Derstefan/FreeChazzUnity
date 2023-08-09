@@ -8,7 +8,7 @@ using UnityEngine;
         private bool shatterAnimationStarted = false;
         public DestroyAnimation(Piece piece)
         {
-            duration = 0.0f;
+            duration = 0.25f;
             progressTime = 0f;
             this.piece = piece;
         }

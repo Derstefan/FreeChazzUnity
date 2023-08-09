@@ -12,15 +12,31 @@ using UnityEngine;
 
         public Piece toPiece;
 
-        public SwapAnimation(Piece piece, Vector3 startPosition, Vector3 endPosition, Piece toPiece)
+
+        //this is here because an actionchain can start before the pos is updated with piece
+        public bool alreadyStarted = false;
+        private GameManager gameManager;
+        private EventDTO eventDTO;
+
+
+
+
+        public SwapAnimation(GameManager gameManager, EventDTO eventDTO)
         {
-            this.transform = piece.gameObject.transform;
-            this.startPosition = startPosition;
-            this.endPosition = endPosition;
-            this.toPiece = toPiece;
-            duration = 0.3f + Vector3.Distance(startPosition, endPosition)*0.08f;
+            this.gameManager = gameManager;
+            this.eventDTO = eventDTO;
+        }   
+
+        private void init()
+        {
+            this.transform = gameManager.getPieceByPos(eventDTO.fromPos).gameObject.transform;
+            this.startPosition = (eventDTO.fromPos.invertY().GetVector2() + new Vector2(0.5f, -0.5f)) * gameManager.size;
+            this.endPosition = (eventDTO.toPos.invertY().GetVector2() + new Vector2(0.5f, -0.5f)) * gameManager.size;
+            this.toPiece = gameManager.getPieceByPos(eventDTO.toPos);
+            duration = 0.3f + Vector3.Distance(startPosition, endPosition) * 0.08f;
             progressTime = 0f;
         }
+   
 
 
 
@@ -28,6 +44,11 @@ using UnityEngine;
 
     public override void animate()
     {
+        if (!alreadyStarted)
+        {
+            init();
+            alreadyStarted = true;
+        }
         float progress = progressTime / duration;
         float t = Mathf.SmoothStep(0f, 1f, progress);
         transform.position = Vector3.Lerp(startPosition, endPosition, t);

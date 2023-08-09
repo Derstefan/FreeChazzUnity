@@ -27,6 +27,23 @@ public class GameState
         p.pos.y = pos.y;
     }
 
+    public void swapPieces(Pos pos1, Pos pos2)
+    {
+        Debug.Log("Swapping pieces");
+        Piece p1 = pieces[pos1.x, pos1.y];
+        Piece p2 = pieces[pos2.x, pos2.y];
+        if(p1==null || p2 == null)
+        {
+            Debug.LogError("Tried to swap null piece");
+        }
+        pieces[pos1.x, pos1.y] = p2;
+        pieces[pos2.x, pos2.y] = p1;
+        p1.pos.x = pos2.x;
+        p1.pos.y = pos2.y;
+        p2.pos.x = pos1.x;
+        p2.pos.y = pos1.y;
+    }
+
     public void destroy(Piece p){
         pieces[p.pos.x, p.pos.y] = null;
         pieceList.Remove(p);
@@ -34,6 +51,11 @@ public class GameState
 
     public Piece getPiece(int i,int j){
         return pieces[i,j];
+    }
+
+    public Piece getPiece(Pos pos)
+    {
+        return pieces[pos.x, pos.y];
     }
 
     public Piece getPieceById(string pieceId)
