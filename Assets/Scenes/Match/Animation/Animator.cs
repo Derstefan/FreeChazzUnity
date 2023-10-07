@@ -10,16 +10,16 @@ using UnityEngine;
 
         public float progressTime = 0f;
 
-        public PieceDTO[] pieceDTOsAfterEvent;
+        public UpdateDataDTO updateData;
 
-        public Animator(DrawEventDTO drawEventDTO, PieceDTO[] pieceDTOsAfterEvent, GameManager gameManager)
+        public Animator(UpdateDataDTO updateData, GameManager gameManager)
         {
-        this.pieceDTOsAfterEvent = pieceDTOsAfterEvent;
+        this.updateData = updateData;
         this.animations = new List<Animation>();
-        for (int i = 0; i < drawEventDTO.events.Length; i++)
+        for (int i = 0; i < updateData.drawEvent.events.Length; i++)
         {
               //create animation for each event 
-              EventDTO eventDTO = drawEventDTO.events[i];
+              EventDTO eventDTO = updateData.drawEvent.events[i];
             switch (eventDTO.type)
             {
                 case "MOVE":

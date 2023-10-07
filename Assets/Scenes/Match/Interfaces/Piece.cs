@@ -21,7 +21,7 @@ public class Piece
     {
         pieceId = pieceDTO.pieceId;
         pieceTypeId = pieceDTO.pieceTypeId;
-        pos = pieceDTO.pos;
+        pos = new Pos(pieceDTO.pos.x, pieceDTO.pos.y);
         symbol = pieceDTO.symbol;
         moveSet = pieceDTO.moveSet;
         owner = pieceDTO.owner;
@@ -35,4 +35,9 @@ public class Piece
 //        public static Piece mockPiece1 =  new Piece(PieceDTO.mockPieceDTO1);
 //        public static Piece mockPiece2 =  new Piece(PieceDTO.mockPieceDTO2);
     
+
+    public string toString()
+    {
+        return "Piece: "+pieceId+" "+pieceTypeId+" "+pos+" "+symbol+" "+moveSet+" "+owner;
+    }
 }

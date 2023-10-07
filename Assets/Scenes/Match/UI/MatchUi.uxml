@@ -4,9 +4,10 @@
             <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); align-self: stretch; justify-content: flex-start; height: 42px; width: 92px; align-items: flex-start; flex-wrap: nowrap; overflow: visible; flex-direction: row;">
                 <ui:Button text="Menü" display-tooltip-when-elided="true" name="menu" selectable="true" />
                 <ui:Button text="&lt;" display-tooltip-when-elided="true" name="back" style="align-self: flex-start; align-items: center; justify-content: flex-end; -unity-text-align: upper-left;" />
-                <ui:Label tabindex="-1" text="Turn 0" display-tooltip-when-elided="true" style="align-self: flex-start;" />
+                <ui:Label tabindex="-1" text="Turn 0/0" display-tooltip-when-elided="true" name="turn" style="align-self: flex-start;" />
                 <ui:Button text="&gt;" display-tooltip-when-elided="true" name="nextTurn" style="align-self: flex-start;" />
                 <ui:Button text="&gt;&gt;&gt;" display-tooltip-when-elided="true" name="currentTurn" style="align-self: flex-start; justify-content: flex-end; align-items: flex-start;" />
+                <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="log" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

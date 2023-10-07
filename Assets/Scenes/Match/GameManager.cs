@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,7 +16,8 @@ public class GameManager : MonoBehaviour
     private string playerType;//for hotseat
 
     // Gamestate
-    private GameState gameState;
+    public GameState gameState;
+    private string winner = ""; // "" means no winner
 
     //Frontend State
 
@@ -30,6 +32,8 @@ public class GameManager : MonoBehaviour
 
 
     //History
+    private History history = new History();
+    private bool isInHistory = false;
 
 
     //technical stuff
@@ -39,7 +43,7 @@ public class GameManager : MonoBehaviour
     public int width;
     public int height;
     private float timer = 0.0f;
-    private float interval = 0.5f;
+    private float updateCheckInterval = 0.5f;
 
     private bool initialLoaded = false;
     private bool isUpdating = true;
@@ -58,7 +62,10 @@ public class GameManager : MonoBehaviour
     private bool isAnimating = false;
     private Animator animator = null;
 
-    
+    private SpriteRenderer historyGray;
+    private MatchUiScript uiScript;
+
+
 
     void Start()
     {
@@ -71,7 +78,7 @@ public class GameManager : MonoBehaviour
     {
         if (updateDataDTO == null)
         {
-            Debug.Log("no connection");
+            Debug.LogError("no connection");
             initialLoaded = false;
         }
         width = updateDataDTO.width;
@@ -81,18 +88,25 @@ public class GameManager : MonoBehaviour
         gameState = new GameState(width, height);
 
         boardRenderer = new BoardRenderer(chessboard.transform, width, height, size, updateDataDTO.player1.playerType);
- 
+        
 
         pieceViewRenderer = new PieceViewRenderer(pieceView.transform);
-
-        initialLoaded = true;
+        historyGray = GameObject.Find("HistoryGray").GetComponent<SpriteRenderer>();
+        uiScript = GameObject.Find("UIDocument").GetComponent<MatchUiScript>();
+        
 
         drawChessboard();
         gameState.turn = updateDataDTO.turn;
         gameState.nextTurn = updateDataDTO.nextTurn;
         playerType = updateDataDTO.player1.playerType;//TODO: change it for network play
-        updatePieces(updateDataDTO.pieceDTOs);
+        history.Add(updateDataDTO);
+        history.get(0);
+        
+
+        instantUpdatePieces(updateDataDTO.pieceDTOs);
         loadPieceTypes();
+        initialLoaded = true;
+
     }
 
     void Update()
@@ -122,35 +136,39 @@ public class GameManager : MonoBehaviour
         }
 
         // check for updates
-        if (initialLoaded && isUpdating && !isAnimating)
+        if (!gameIsOver() && initialLoaded && isUpdating && !isAnimating)
         {
             timer += Time.deltaTime;
-            if (timer >= interval)
+            if (timer >= updateCheckInterval)
             {
-                StartCoroutine(GameService.checkUpdate(gameState.turn + 1, UpdateMatchData));
+                StartCoroutine(GameService.checkUpdate(gameState.turn + 1, UpdateMatchDataWithAnimation));
                 timer = 0.0f; // Reset the timer
             }
         }
 
         // animate
-        if (isAnimating)
+        if (isAnimating && !isInHistory)
         {
             bool finished = animator.animate(Time.deltaTime);
             if (finished)
             {
                 Debug.Log("animation finished");
-                updatePieces(animator.pieceDTOsAfterEvent);
+                instantUpdatePieces(animator.updateData.pieceDTOs);
                 isAnimating = false;
                 animator = null;
             }
         }
     }
 
-    private void UpdateMatchData(UpdateDataDTO updateData)
+
+
+    private void UpdateMatchDataWithAnimation(UpdateDataDTO updateData)
     {
-        if (updateData.winner != "")
-        {
-            Debug.Log("winner is " + updateData.winner);
+         if (updateData.winner != "")
+         {
+             winner = updateData.winner;
+             uiScript.writeLog("winner is " + updateData.winner);
+             return;
         }
 
         if (updateData.pieceDTOs == null || updateData.pieceDTOs.Length == 0 || isAnimating)
@@ -158,30 +176,73 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        
+
 
         //Debug.Log(" ------------------------------ new Board Update turn:" + updateData.turn);
-        if(gameState.turn +1== updateData.turn && updateData.drawEvent != null)
+        if (gameState.turn +1 == updateData.turn && updateData.drawEvent != null)
         {
-            startAnimation(updateData.drawEvent, updateData.pieceDTOs);
+            startAnimation(updateData);
         } 
+
         gameState.turn = updateData.turn;
+        
         if (gameState.turn > gameState.maxTurns)
         {
             gameState.maxTurns = gameState.turn;
+            history.Add(updateData);
         }
         gameState.nextTurn = updateData.nextTurn;
-
-
-
-        
+        uiScript.updateTurn();
     }
 
-    private void startAnimation(DrawEventDTO drawEventDTO,PieceDTO[] pieceDTOsAfterEvent)
+    public void loadTurn(int turn)
+    {
+        //Debug.Log("loadTurn " + turn + " maxTurns" + gameState.maxTurns);
+        if (turn < gameState.maxTurns) {
+            isUpdating = false;
+            isInHistory = true;
+            gameState.turn = turn;
+            instantUpdatePieces(history.get(turn).pieceDTOs);
+
+            StartCoroutine(SmoothlyChangeAlpha(0.4f, 0.5f));
+
+        } else if(turn == gameState.maxTurns)
+        {
+            isUpdating = true;
+            isInHistory = false;
+            gameState.turn = turn;
+            instantUpdatePieces(history.get(turn).pieceDTOs);
+            StartCoroutine(SmoothlyChangeAlpha(0.0f, 0.5f));
+
+        }
+    }
+
+
+
+    private IEnumerator SmoothlyChangeAlpha(float targetAlpha, float duration)
+    {
+        Color startColor = historyGray.color;
+        float startTime = Time.time;
+
+        while (Time.time < startTime + duration)
+        {
+            float t = (Time.time - startTime) / duration;
+            Color lerpedColor = historyGray.color;
+            lerpedColor.a = Mathf.Lerp(startColor.a, targetAlpha, t);
+            historyGray.color = lerpedColor;
+            yield return null;
+        }
+
+        Color finalColor = historyGray.color;
+        finalColor.a = targetAlpha;
+        historyGray.color = finalColor;
+    }
+
+    private void startAnimation(UpdateDataDTO updateData)
     {        
         Debug.Log("startAnimation");
         
-        animator = new Animator(drawEventDTO, pieceDTOsAfterEvent, this);
+        animator = new Animator(updateData, this);
         isAnimating = true;
 
     }
@@ -189,11 +250,10 @@ public class GameManager : MonoBehaviour
 
 
     // this put all positions an possibleMoves
-    private void updatePieces(PieceDTO[] newPieceDTOs)
+    private void instantUpdatePieces(PieceDTO[] newPieceDTOs)
     {
         List<Piece> piecesToDestroy = new List<Piece>();
         List<Piece> piecesToAdd = new List<Piece>();
-        List<Piece> piecesToMove = new List<Piece>();
 
         foreach (Piece p in gameState.pieceList)
         {
@@ -213,13 +273,12 @@ public class GameManager : MonoBehaviour
             Piece existingPiece = gameState.getPieceById(pDTO.pieceId);
             if (existingPiece != null)
             {
+                
                 //Update Piece values
                 if (!existingPiece.pos.equals(pDTO.pos))
                 {
-                    existingPiece.pos = pDTO.pos;
-                    piecesToMove.Add(existingPiece);
+                    movePiece(existingPiece, pDTO.pos);
                 }
-
                 existingPiece.moveSet = pDTO.moveSet;
             }
             else
@@ -228,16 +287,14 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        foreach (Piece p in piecesToMove)
-        {
-            movePiece(p, p.pos);
-        }
-
         foreach (Piece p in piecesToAdd)
         {
             addPiece(p);
         }
     }
+
+
+
 
     private void loadPieceTypes()
     {
@@ -268,8 +325,9 @@ public class GameManager : MonoBehaviour
 
     private void movePiece(Piece p, Pos pos)
     {
-        gameState.movePiece(p, pos);
+        Pos oldPos = new Pos(p.pos.x,p.pos.y);
 
+        gameState.movePiece(p, new Pos(pos.x,pos.y));
         p.gameObject.transform.localPosition = new Vector3(
             p.pos.x * size + size / 2f,
             -p.pos.y * size - size / 2f,
@@ -305,15 +363,16 @@ public class GameManager : MonoBehaviour
 
     private void play(int x, int y)
     {
-        boardRenderer.removePossibleMoves();
-        boardRenderer.removeSelected();
-        StartCoroutine(GameService.play(selectedPiece.pos, new Pos(x, y), UpdateMatchData));
-        unselectPiece(x, y);
+        if (!gameIsOver() && !isAnimating) {
+            boardRenderer.removePossibleMoves();
+            boardRenderer.removeSelected();
+            StartCoroutine(GameService.play(selectedPiece.pos, new Pos(x, y), UpdateMatchDataWithAnimation));
+            unselectPiece(x, y);
+        }
     }
 
     private void selectPiece(int x, int y)
     {
-        Debug.Log("selectPiece");
         selectedPiece = gameState.pieces[x, y];
         boardRenderer.removePossibleMoves();
         boardRenderer.removeSelected();
@@ -342,7 +401,7 @@ public class GameManager : MonoBehaviour
 
     private void mouseMove(int x, int y)
     {
-        if (gameState.pieces[x, y] != null)
+        if (gameState.getPiece(x,y) != null)
         {
             mouseEnterPiece(x, y);
         }
@@ -389,17 +448,14 @@ public class GameManager : MonoBehaviour
     {
         if (selectedPiece == null)
         {
-            Debug.Log("selectedPiece == null");
             return false;
         }
         if (selectedPiece.moveSet == null)
         {
-            Debug.Log("selectedPiece.moveSet == null");
             return false;
         }
         if (selectedPiece.moveSet.possibleMoves == null)
         {
-            Debug.Log("selectedPiece.moveSet.possibleMoves == null");
             return false;
         }
 
@@ -462,4 +518,8 @@ public class GameManager : MonoBehaviour
         return gameState.pieces[pos.x, pos.y];
     }
     
+    private bool gameIsOver()
+    {
+        return winner != "";
+    }
 }

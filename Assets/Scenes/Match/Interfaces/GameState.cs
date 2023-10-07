@@ -25,6 +25,7 @@ public class GameState
         pieces[pos.x, pos.y] = p;
         p.pos.x = pos.x;
         p.pos.y = pos.y;
+ 
     }
 
     public void swapPieces(Pos pos1, Pos pos2)
@@ -69,4 +70,5 @@ public class GameState
         }
         return null;
     }
+
 }

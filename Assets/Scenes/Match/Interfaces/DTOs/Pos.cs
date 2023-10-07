@@ -37,4 +37,9 @@ public class Pos
     }
 
     
+
+    public string ToString()
+    {
+        return "("+x+","+y+")";
+    }
 }

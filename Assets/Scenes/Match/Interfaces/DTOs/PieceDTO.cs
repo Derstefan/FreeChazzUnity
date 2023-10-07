@@ -14,4 +14,12 @@ public class PieceDTO
     public MoveSet moveSet;
     public string owner;
 
+    public string ToString()
+    {
+        return "PieceDTO{" +
+                "pieceId='" + pieceId + '\'' +
+                ", pos=" + pos.ToString() +
+                '}';
+    }
+
 }
