@@ -7,5 +7,5 @@ using UnityEngine;
 [System.Serializable]
 public class MoveSet
 {
-    public Pos[] possibleMoves;
+    public ActionPos[] possibleMoves;
 }

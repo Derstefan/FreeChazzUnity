@@ -9,7 +9,6 @@ public class Pos
 {
     public int x;
     public int y;
-    public string tag;
 
     public Pos(int x, int y)
     {

@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
 
     //data about the game
     private string gameId;
-    private string playerType;//for hotseat
+    private string playerType; //is the current player
 
     // Gamestate
     public GameState gameState;
@@ -193,6 +193,10 @@ public class GameManager : MonoBehaviour
         }
         gameState.nextTurn = updateData.nextTurn;
         uiScript.updateTurn();
+        if (Params.isHotSeat)
+        {
+            playerType = updateData.nextTurn;
+        }
     }
 
     public void loadTurn(int turn)
@@ -363,12 +367,20 @@ public class GameManager : MonoBehaviour
 
     private void play(int x, int y)
     {
-        if (!gameIsOver() && !isAnimating) {
-            boardRenderer.removePossibleMoves();
-            boardRenderer.removeSelected();
-            StartCoroutine(GameService.play(selectedPiece.pos, new Pos(x, y), UpdateMatchDataWithAnimation));
-            unselectPiece(x, y);
+        if (gameIsOver() || isAnimating)
+        {
+            return;
         }
+        if (selectedPiece.owner != playerType)
+        {
+            return;
+        }
+
+        boardRenderer.removePossibleMoves();
+        boardRenderer.removeSelected();
+        StartCoroutine(GameService.play(selectedPiece.pos, new Pos(x, y), UpdateMatchDataWithAnimation));
+        unselectPiece(x, y);
+        
     }
 
     private void selectPiece(int x, int y)

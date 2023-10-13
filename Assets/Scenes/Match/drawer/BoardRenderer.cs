@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using Assets.Scenes.Match.drawer;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -63,7 +64,7 @@ public class BoardRenderer : MonoBehaviour
     public void CreateAndConnectGameObject(Piece piece)
     {
         Vector3 vec = new Vector3(piece.pos.x * size + size/2f, -piece.pos.y * size - size/2f, -1);
-        GameObject gameObject = PieceDrawer.generatePieceObject(piece.pieceId,vec,piece.pieceTypeId.pieceTypeId,size);
+        GameObject gameObject = PieceRenderer.createPieceObject(piece.pieceId,vec,piece.pieceTypeId.pieceTypeId,size);
         gameObject.transform.parent = transform.GetChild(1).transform;
 
         GameObject ownerAura = piece.owner == player ? Instantiate(aura2) : Instantiate(aura1);
@@ -113,7 +114,7 @@ public class BoardRenderer : MonoBehaviour
 
     public void drawPossibleMoves(MoveSet moveSet, bool isOwner)
     {
-        foreach (Pos pos in moveSet.possibleMoves)
+        foreach (ActionPos pos in moveSet.possibleMoves)
         {
                 possibleSquares.Add(createPossibleMoveSquare("PossibleMove ("+pos.x+","+pos.y+")",transform.GetChild(0).transform, new Vector3(pos.x * size, -pos.y * size,-10.1f),pos.tag, isOwner));
         }
@@ -121,7 +122,7 @@ public class BoardRenderer : MonoBehaviour
 
     public void drawSelected(Pos piecePos, bool isOwner)
     {
-        selectedPiece = createPossibleMoveSquare("PiecePos ("+piecePos.x+","+piecePos.y+")",transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size,-10.1f),piecePos.tag, isOwner);
+        selectedPiece = createPossibleMoveSquare("PiecePos ("+piecePos.x+","+piecePos.y+")",transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size,-10.1f),"TODO:tag", isOwner);
     }
 
     public void removePossibleMoves(){
@@ -140,7 +141,7 @@ public class BoardRenderer : MonoBehaviour
 
     public void drawMouseOverPossibleMoves(MoveSet moveSet,bool isOwner)
     {
-        foreach (Pos pos in moveSet.possibleMoves)
+        foreach (ActionPos pos in moveSet.possibleMoves)
         {
             mouseOverpossibleSquares.Add(createPossibleMoveSquare("PossibleMove (" + pos.x + "," + pos.y + ")", transform.GetChild(0).transform, new Vector3(pos.x * size, -pos.y * size, -10.1f), pos.tag, isOwner));
         }
@@ -148,7 +149,7 @@ public class BoardRenderer : MonoBehaviour
 
     public void drawMouseOverSelected(Pos piecePos, bool isOwner)
     {
-        mouseOverPiece = createPossibleMoveSquare("PiecePos (" + piecePos.x + "," + piecePos.y + ")", transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size, -10.1f), piecePos.tag, isOwner);
+        mouseOverPiece = createPossibleMoveSquare("PiecePos (" + piecePos.x + "," + piecePos.y + ")", transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size, -10.1f), "TODO:tag", isOwner);
     }
 
     public void removeMouseOverPossibleMoves()

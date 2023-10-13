@@ -18,10 +18,6 @@ public class PieceViewRenderer
     }
     public void render(Piece piece,PieceTypeDTO pieceTypeDTO)
     {
-        
-        List<Vector2Int> list = new List<Vector2Int>();
-        list.Add(new Vector2Int(0, 0));
-        list.Add(new Vector2Int(1, 0));
 
         removeChilds(actionGrid);
         removeChilds(piecePic);
