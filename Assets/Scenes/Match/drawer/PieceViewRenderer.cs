@@ -1,6 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
+using Assets.Scenes.Match.drawer;
 using UnityEngine;
 
 public class PieceViewRenderer
@@ -16,14 +14,20 @@ public class PieceViewRenderer
         this.piecePic = parent.Find("PiecePic").transform;
         this.actionGrid = parent.Find("ActionGrid").transform;
     }
-    public void render(Piece piece,PieceTypeDTO pieceTypeDTO)
+    public void render(Piece piece, PieceTypeDTO pieceTypeDTO)
     {
 
         removeChilds(actionGrid);
         removeChilds(piecePic);
 
 
-        PieceDrawer.render(piecePic,piece, 5);
+        //PieceDrawer.render(piecePic, piece, 5);
+
+
+        GameObject pieceObject = PieceRenderer.createPieceObject("view", Vector2.zero, pieceTypeDTO.pieceTypeId.pieceTypeId, 6);
+        pieceObject.transform.parent = piecePic.transform;
+        pieceObject.transform.localPosition = Vector3.zero;
+
         GridRenderer.render(actionGrid, 5, 5, pieceTypeDTO.actions);
     }
 

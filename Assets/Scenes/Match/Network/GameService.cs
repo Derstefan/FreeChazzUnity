@@ -1,18 +1,17 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using UnityEngine.Networking;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class GameService
 {
 
 
     //create Game
-    public static IEnumerator createGame(bool isHotSeat,Action<UpdateDataDTO> callback)
+    public static IEnumerator createGame(bool isHotSeat, Action<UpdateDataDTO> callback)
     {
         // Create a UnityWebRequest object
-        UnityWebRequest request = UnityWebRequest.Get(isHotSeat ? "http://127.0.0.1:8080/api/test/newgame": "http://127.0.0.1:8080/api/test/newbotgame");
+        UnityWebRequest request = UnityWebRequest.Get(isHotSeat ? "http://127.0.0.1:8080/api/test/newgame" : "http://127.0.0.1:8080/api/test/newbotgame");
 
         // Send the request and wait for a response
         yield return request.SendWebRequest();
@@ -24,7 +23,7 @@ public class GameService
         }
         else
         {
-            
+
             UpdateDataDTO updateDataDTO = JsonUtility.FromJson<UpdateDataDTO>(request.downloadHandler.text);
             Debug.Log(request.downloadHandler.text);
             callback(updateDataDTO);
@@ -33,10 +32,10 @@ public class GameService
 
 
     //get Update
-    public static IEnumerator checkUpdate(int turn,Action<UpdateDataDTO> callback)
+    public static IEnumerator checkUpdate(int turn, Action<UpdateDataDTO> callback)
     {
         // Create a UnityWebRequest object
-        UnityWebRequest request = UnityWebRequest.Get("http://127.0.0.1:8080/api/test/update/"+turn);
+        UnityWebRequest request = UnityWebRequest.Get("http://127.0.0.1:8080/api/test/update/" + turn);
 
         // Send the request and wait for a response
         yield return request.SendWebRequest();
@@ -85,7 +84,7 @@ public class GameService
     public static IEnumerator play(Pos from, Pos to, Action<UpdateDataDTO> callback)
     {
         // Create a UnityWebRequest object
-        UnityWebRequest request = UnityWebRequest.Get("http://127.0.0.1:8080/api/test/play/"+from.x+"/"+from.y+"/"+to.x+"/"+to.y+"/");
+        UnityWebRequest request = UnityWebRequest.Get("http://127.0.0.1:8080/api/test/play/" + from.x + "/" + from.y + "/" + to.x + "/" + to.y + "/");
 
         // Send the request and wait for a response
         yield return request.SendWebRequest();

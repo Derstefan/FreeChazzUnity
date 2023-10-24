@@ -1,61 +1,55 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PieceDrawer
 {
 
-    private static  Material vertexColorMaterial = new Material(Shader.Find("Sprites/Default"));
+    private static Material vertexColorMaterial = new Material(Shader.Find("Sprites/Default"));
 
-    
-    public static void render(Transform transform,Piece piece, int size)
+
+    public static void render(Transform transform, Piece piece, int size)
     {
-        GameObject pieceObject = generatePieceObject(piece.pieceId,Vector3.zero,piece.pieceTypeId.pieceTypeId,size);
+        GameObject pieceObject = generatePieceObject(piece.pieceId, Vector3.zero, piece.pieceTypeId.pieceTypeId, size);
         pieceObject.transform.parent = transform;
-        pieceObject.transform.localPosition = new Vector3(+size/2,-size/2,-1);
+        pieceObject.transform.localPosition = new Vector3(+size / 2, -size / 2, -1);
     }
 
-    public static GameObject generatePieceObject(string name,Vector3 vec,string seed,float size)
+    public static GameObject generatePieceObject(string name, Vector3 vec, string seed, float size)
     {
         GameObject pieceObject = new GameObject(name);
         pieceObject.transform.localPosition = vec;
-       
+
         int numPolygonsToAdd = 3; // Number of polygons to add
         for (int i = 0; i < numPolygonsToAdd; i++)
         {
-            addPolygonToPieceObject(pieceObject,seed+i,i,size,size);
+            addPolygonToPieceObject(pieceObject, seed + i, i, size, size);
         }
         return pieceObject;
     }
 
 
 
-    private static void addPolygonToPieceObject(GameObject pieceObject,string str, int z,float width, float height)
+    private static void addPolygonToPieceObject(GameObject pieceObject, string str, int z, float width, float height)
     {
         GameObject polygonObject = new GameObject("Polygon");
         polygonObject.transform.parent = pieceObject.transform;
-        polygonObject.transform.localPosition = new Vector3(0,0,-1-0.1f*z); // Set the position relative to the parent
+        polygonObject.transform.localPosition = new Vector3(0, 0, -1 - 0.1f * z); // Set the position relative to the parent
 
         MeshFilter polygonMeshFilter = polygonObject.AddComponent<MeshFilter>();
-        polygonMeshFilter.mesh = MeshGenerator.GeneratePolygonMesh(6, str,width,height);
+        polygonMeshFilter.mesh = MeshGenerator.GeneratePolygonMesh(6, str, width, height);
         MeshRenderer polygonMeshRenderer = polygonObject.AddComponent<MeshRenderer>();
         polygonMeshRenderer.material = vertexColorMaterial;
     }
 
 
-
-
-
-
-
-        public static GameObject generateTest(string name,Vector3 vec)
+    public static GameObject generateTest(string name, Vector3 vec)
     {
         GameObject pieceObject = new GameObject(name);
         pieceObject.transform.localPosition = vec;
         MeshFilter polygonMeshFilter = pieceObject.AddComponent<MeshFilter>();
         MeshRenderer polygonMeshRenderer = pieceObject.AddComponent<MeshRenderer>();
         polygonMeshRenderer.material = vertexColorMaterial;
-       
+
 
 
 
@@ -76,7 +70,7 @@ public class PieceDrawer
             false,
             true
         };
-        polygonMeshFilter.mesh = MeshGenerator.GenerateRoundedMesh(positions,roundedCorners);
+        polygonMeshFilter.mesh = MeshGenerator.GenerateRoundedMesh(positions, roundedCorners);
 
         return pieceObject;
     }

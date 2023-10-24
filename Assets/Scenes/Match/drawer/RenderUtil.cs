@@ -1,6 +1,5 @@
-﻿using UnityEditor;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using System.Collections.Generic;
 
 
 
@@ -25,6 +24,7 @@ public class RenderUtil
 {
     private static List<ElementConfig> elementConfigs;
 
+    public static Material DEFAULT_MATERIAL = new Material(Shader.Find("Sprites/Default")); //{ color = new Color(1.0f, 1.0f, 1.0f, 3.0f) }; // Default
     public static Material materialDefault = new Material(Shader.Find("Sprites/Default")) { color = new Color(0.2f, 0.3f, 0.3f, 0.3f) }; // Default
     public static Material red = new Material(Shader.Find("Sprites/Default")) { color = new Color(3.2f, 0.8f, 0.8f, 0.3f) };
     public static Material green = new Material(Shader.Find("Sprites/Default")) { color = new Color(0.2f, 2.8f, 0.2f, 0.3f) };

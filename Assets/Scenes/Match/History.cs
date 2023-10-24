@@ -1,21 +1,19 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 public class History
-    {
-        private List<UpdateDataDTO> history = new List<UpdateDataDTO>();
+{
+    private List<UpdateDataDTO> history = new List<UpdateDataDTO>();
 
-     public void Add(UpdateDataDTO updateData)
-       {
-            history.Add(updateData);
+    public void Add(UpdateDataDTO updateData)
+    {
+        history.Add(updateData);
 
     }
 
 
     public UpdateDataDTO get(int i)
-        {
+    {
         return history[i];
-        }
+    }
 
 }

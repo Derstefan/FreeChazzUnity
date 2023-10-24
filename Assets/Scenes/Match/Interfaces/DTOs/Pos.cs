@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -15,7 +12,7 @@ public class Pos
         this.x = x;
         this.y = y;
     }
-        public bool equals(Pos other)
+    public bool equals(Pos other)
     {
         return this.x == other.x && this.y == other.y;
     }
@@ -25,9 +22,14 @@ public class Pos
         return new Pos(x, -y);
     }
 
-        public Vector2 GetVector2()
+    public Vector2 GetVector2()
     {
         return new Vector2(x, y);
+    }
+
+    public Vector3 GetVector3(float z)
+    {
+        return new Vector3(x, y, z);
     }
 
     public override int GetHashCode()
@@ -35,10 +37,10 @@ public class Pos
         return x.GetHashCode() ^ y.GetHashCode();
     }
 
-    
+
 
     public string ToString()
     {
-        return "("+x+","+y+")";
+        return "(" + x + "," + y + ")";
     }
 }

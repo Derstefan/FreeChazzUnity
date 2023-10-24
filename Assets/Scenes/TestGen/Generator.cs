@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using Assets.Scenes.Match.drawer;
 using UnityEngine;
 
 public class Generator : MonoBehaviour
@@ -8,29 +7,36 @@ public class Generator : MonoBehaviour
     public GameObject pieceView;
 
     private GameObject generatedPiece;
+
     // Start is called before the first frame update
     void Start()
     {
-        generatedPiece = PieceDrawer.generatePieceObject(Util.GenerateRandomString(2),new Vector3(0,0,-1), Util.GenerateRandomString(20),1);
+        generatedPiece = PieceRenderer.createPieceObject(Util.GenerateRandomString(2), new Vector3(0, 0, -10), Util.GenerateRandomString(20), 4);
         generatedPiece.transform.parent = pieceView.transform;
+        generatedPiece.transform.localPosition = Vector3.zero;
     }
 
 
-     void Update()
+    void Update()
     {
-        if (Input.GetButtonDown("Fire1")){
-            DestroyDrawer.startDestroyAnimation(generatedPiece,11.4f,3.0f);
+        if (Input.GetButtonDown("Fire1"))
+        {
+            DestroyDrawer.startDestroyAnimation(generatedPiece.gameObject, 5.4f, 1.0f);
             Destroy(generatedPiece);
-            generatedPiece = PieceDrawer.generatePieceObject(Util.GenerateRandomString(2),new Vector3(0,0,-1), Util.GenerateRandomString(20),1);
+            generatedPiece = PieceRenderer.createPieceObject(Util.GenerateRandomString(2), new Vector3(0, 0, -10), Util.GenerateRandomString(20), 4);
+            generatedPiece.transform.parent = pieceView.transform;
+            generatedPiece.transform.localPosition = Vector3.zero;
+
         }
     }
 
 
 
-    private GameObject drawExample(){
+    private GameObject drawExample()
+    {
 
-        
-       return PieceDrawer.generateTest("bla",new Vector3(0,0,-1));
+
+        return PieceDrawer.generateTest("bla", new Vector3(0, 0, -1));
 
 
     }

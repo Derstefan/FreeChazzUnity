@@ -1,11 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using Assets.Scenes.Match.drawer;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-public class BoardRenderer : MonoBehaviour 
+public class BoardRenderer : MonoBehaviour
 {
 
     private Mesh mesh;
@@ -29,11 +26,10 @@ public class BoardRenderer : MonoBehaviour
 
     private static Material vertexColorMaterial = new Material(Shader.Find("Sprites/Default"));
 
-    private GameObject aura1;
-    private GameObject aura2;
+    public GameObject aura;
 
 
-    public BoardRenderer(Transform transform, int width, int height,float size, string player)
+    public BoardRenderer(Transform transform, int width, int height, float size, string player)
     {
         this.transform = transform;
         this.size = size;
@@ -43,10 +39,8 @@ public class BoardRenderer : MonoBehaviour
         this.meshSmall = createSquareSmall();
         this.player = player;
 
-        this.aura1 = createOwnerAura(size, Color.black);
-        aura1.SetActive(false);
-        this.aura2 = createOwnerAura(size, Color.white);
-        aura2.SetActive(false);
+        this.aura = createOwnerAura(size, Color.black);
+        aura.SetActive(false);
     }
 
 
@@ -63,17 +57,18 @@ public class BoardRenderer : MonoBehaviour
     //Create a GameObject for a Piece and connect it to the Piece object
     public void CreateAndConnectGameObject(Piece piece)
     {
-        Vector3 vec = new Vector3(piece.pos.x * size + size/2f, -piece.pos.y * size - size/2f, -1);
-        GameObject gameObject = PieceRenderer.createPieceObject(piece.pieceId,vec,piece.pieceTypeId.pieceTypeId,size);
+        Vector3 vec = new Vector3(piece.pos.x * size + size / 2f, -piece.pos.y * size - size / 2f, -1);
+        GameObject gameObject = PieceRenderer.createPieceObject(piece.pieceId, vec, piece.pieceTypeId.pieceTypeId, size);
         gameObject.transform.parent = transform.GetChild(1).transform;
 
-        GameObject ownerAura = piece.owner == player ? Instantiate(aura2) : Instantiate(aura1);
+        //GameObject ownerAura = piece.owner == player ? Instantiate(aura) : Instantiate(aura);
+        GameObject ownerAura = Instantiate(aura);
         ownerAura.SetActive(true);
         ownerAura.transform.parent = gameObject.transform;
         ownerAura.transform.localPosition = Vector3.zero;
 
 
-        piece.gameObject =  gameObject;
+        piece.gameObject = gameObject;
     }
 
 
@@ -95,9 +90,9 @@ public class BoardRenderer : MonoBehaviour
         {
             for (int j = 0; j < height; j++)
             {
-                GameObject square = new GameObject("Square ("+i+","+j+")");
+                GameObject square = new GameObject("Square (" + i + "," + j + ")");
                 square.transform.parent = transform.GetChild(0).transform;
-                square.transform.localPosition = new Vector3(i * size, -j * size,0);
+                square.transform.localPosition = new Vector3(i * size, -j * size, 0);
 
                 MeshFilter meshFilter = square.AddComponent<MeshFilter>();
                 MeshRenderer meshRenderer = square.AddComponent<MeshRenderer>();
@@ -110,22 +105,23 @@ public class BoardRenderer : MonoBehaviour
     }
 
 
-    
+
 
     public void drawPossibleMoves(MoveSet moveSet, bool isOwner)
     {
         foreach (ActionPos pos in moveSet.possibleMoves)
         {
-                possibleSquares.Add(createPossibleMoveSquare("PossibleMove ("+pos.x+","+pos.y+")",transform.GetChild(0).transform, new Vector3(pos.x * size, -pos.y * size,-10.1f),pos.tag, isOwner));
+            possibleSquares.Add(createPossibleMoveSquare("PossibleMove (" + pos.x + "," + pos.y + ")", transform.GetChild(0).transform, new Vector3(pos.x * size, -pos.y * size, -10.1f), pos.tag, isOwner));
         }
     }
 
     public void drawSelected(Pos piecePos, bool isOwner)
     {
-        selectedPiece = createPossibleMoveSquare("PiecePos ("+piecePos.x+","+piecePos.y+")",transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size,-10.1f),"TODO:tag", isOwner);
+        selectedPiece = createPossibleMoveSquare("PiecePos (" + piecePos.x + "," + piecePos.y + ")", transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size, -10.1f), "TODO:tag", isOwner);
     }
 
-    public void removePossibleMoves(){
+    public void removePossibleMoves()
+    {
         foreach (GameObject square in possibleSquares)
         {
             Destroy(square);
@@ -133,13 +129,14 @@ public class BoardRenderer : MonoBehaviour
         possibleSquares.Clear();
     }
 
-    public void removeSelected(){
+    public void removeSelected()
+    {
         Destroy(selectedPiece);
     }
 
 
 
-    public void drawMouseOverPossibleMoves(MoveSet moveSet,bool isOwner)
+    public void drawMouseOverPossibleMoves(MoveSet moveSet, bool isOwner)
     {
         foreach (ActionPos pos in moveSet.possibleMoves)
         {
@@ -179,7 +176,7 @@ public class BoardRenderer : MonoBehaviour
         //actioncolor square
         GameObject square = new GameObject(name);
         square.transform.parent = parentSquare.transform;
-        square.transform.localPosition = new Vector3((1f-smallScale)*size*0.5f,-(1f - smallScale)*size * 0.5f,-20f);
+        square.transform.localPosition = new Vector3((1f - smallScale) * size * 0.5f, -(1f - smallScale) * size * 0.5f, -20f);
 
         MeshFilter meshFilter = square.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = square.AddComponent<MeshRenderer>();
@@ -196,24 +193,24 @@ public class BoardRenderer : MonoBehaviour
         MeshRenderer meshRenderer2 = square2.AddComponent<MeshRenderer>();
 
         meshFilter2.mesh = mesh;
-        meshRenderer2.material = isOwner?RenderUtil.green:RenderUtil.red;
+        meshRenderer2.material = isOwner ? RenderUtil.green : RenderUtil.red;
 
         return parentSquare;
 
     }
 
-    private GameObject createSquareObject(string name,Transform parent,Vector3 position,string type)
+    private GameObject createSquareObject(string name, Transform parent, Vector3 position, string type)
     {
-                GameObject square = new GameObject(name);
-                square.transform.parent = parent;
-                square.transform.localPosition = position;
+        GameObject square = new GameObject(name);
+        square.transform.parent = parent;
+        square.transform.localPosition = position;
 
-                MeshFilter meshFilter = square.AddComponent<MeshFilter>();
-                MeshRenderer meshRenderer = square.AddComponent<MeshRenderer>();
+        MeshFilter meshFilter = square.AddComponent<MeshFilter>();
+        MeshRenderer meshRenderer = square.AddComponent<MeshRenderer>();
 
-                meshFilter.mesh = mesh;
-                meshRenderer.material = RenderUtil.getMaterialByType(type);
-                return square;
+        meshFilter.mesh = mesh;
+        meshRenderer.material = RenderUtil.getMaterialByType(type);
+        return square;
     }
 
 
@@ -234,7 +231,7 @@ public class BoardRenderer : MonoBehaviour
 
     private Mesh createSquareSmall()
     {
-        
+
         Mesh mesh = new Mesh();
         mesh.vertices = new Vector3[]
         {
@@ -323,4 +320,42 @@ public class BoardRenderer : MonoBehaviour
 
         return parentObject;
     }
+
+
+    /*
+    private GameObject createOwnerAura(float size, Color color)
+    {
+
+        int pixelSize = 128;
+        // Create a new texture
+        Texture2D texture = new Texture2D(pixelSize, pixelSize);
+
+        // Draw a black square in the center
+        int borderWidth = 10; // Adjust the size of the transparent border
+        for (int x = borderWidth; x < pixelSize - borderWidth; x++)
+        {
+            for (int y = borderWidth; y < pixelSize - borderWidth; y++)
+            {
+                float diffFromCenter = 1f - Mathf.Abs(x - pixelSize * 0.5f) / (pixelSize * 0.5f);
+
+                texture.SetPixel(x, y, new Color(0, 0, 0, diffFromCenter));
+            }
+        }
+
+        texture.Apply();
+
+        // Create a Sprite from the texture
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 10);
+
+        // Create a GameObject with a SpriteRenderer
+        GameObject squareObject = new GameObject("SquareMeshParent");
+        squareObject.transform.position = Vector3.zero; // Set the position as needed
+
+        SpriteRenderer spriteRenderer = squareObject.AddComponent<SpriteRenderer>();
+        spriteRenderer.sprite = sprite;
+
+        return squareObject;
+    }
+
+    */
 }
