@@ -293,10 +293,10 @@ public class BoardRenderer : MonoBehaviour
 
             // Define colors with transparency
             Color[] colors = new Color[4];
-            colors[0] = new Color(color.r, color.g, color.b, i == 2 ? 1f : 0.3f);   // Center vertex (no transparency)
-            colors[1] = new Color(color.r, color.g, color.b, i == 3 ? 1f : 0.3f);   // Top-left vertex (transparent)
-            colors[2] = new Color(color.r, color.g, color.b, i == 0 ? 1f : 0.3f);   // Top-right vertex (transparent)
-            colors[3] = new Color(color.r, color.g, color.b, i == 1 ? 1f : 0.3f);   // Bottom-right vertex (transparent)
+            colors[0] = new Color(color.r, color.g, color.b, i == 2 ? 0.6f : 0.1f);   // Center vertex (no transparency)
+            colors[1] = new Color(color.r, color.g, color.b, i == 3 ? 0.6f : 0.1f);   // Top-left vertex (transparent)
+            colors[2] = new Color(color.r, color.g, color.b, i == 0 ? 0.6f : 0.1f);   // Top-right vertex (transparent)
+            colors[3] = new Color(color.r, color.g, color.b, i == 1 ? 0.6f : 0.1f);   // Bottom-right vertex (transparent)
 
             // Assign vertices, triangles, UVs, and colors to the mesh
             mesh.vertices = vertices;

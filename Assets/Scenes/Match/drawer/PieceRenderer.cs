@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using Unity.VectorGraphics;
@@ -22,19 +23,27 @@ namespace Assets.Scenes.Match.drawer
             GameObject renderedPiece = new GameObject("RenderedPiece");
             renderedPiece.transform.parent = pieceObject.transform;
             renderedPiece.transform.localPosition = new Vector3(0, 0, -10f);
-            renderedPiece.AddComponent<SpriteRenderer>();
-            renderedPiece.GetComponent<SpriteRenderer>().sprite = generateSprite(2, size * 12f, seed, 2);
+            SpriteRenderer sr = renderedPiece.AddComponent<SpriteRenderer>();
+            sr.material = RenderUtil.VECTOR_GRADIEND_MATERIAL;
+            sr.sprite = generateSprite(2, size * 12f, seed, 2);
             return pieceObject;
         }
 
 
-
+        //this method is for UI
         public static Texture2D render(PieceTypeId pieceTypeId, float size, string playerType)
         {
             return generateTexture(2, 5f, pieceTypeId.pieceTypeId + "", 2);
         }
 
 
+
+        private static Texture2D generateTexture(int numPoints, float size, string seed, int numPolygons)
+        {
+            var sprite = generateSprite(numPoints, size, seed, numPolygons);
+            var texture = VectorUtils.RenderSpriteToTexture2D(sprite, 1000, 1000, RenderUtil.VECTOR_GRADIEND_MATERIAL, 2, false);
+            return texture;
+        }
 
 
         private static List<VectorUtils.Geometry> generateGeoms(int numPoints, float size, string seed, int numPolygons)
@@ -75,7 +84,7 @@ namespace Assets.Scenes.Match.drawer
 
         private static List<Shape> createShapePair(int numPoints, float size)
         {
-            var fill1 = new SolidFill() { Mode = FillMode.OddEven, Color = new Color32((byte)UnityEngine.Random.Range(0, 255), (byte)UnityEngine.Random.Range(0, 255), (byte)UnityEngine.Random.Range(0, 255), 255) };
+            var fill1 = new SolidFill() { Mode = FillMode.OddEven, Color = new Color32((byte)UnityEngine.Random.Range(0, 200), (byte)UnityEngine.Random.Range(0, 200), (byte)UnityEngine.Random.Range(0, 200), 255) };
 
 
             // Generate random points and colors
@@ -124,7 +133,7 @@ namespace Assets.Scenes.Match.drawer
         }
 
 
-        private static Sprite generateSprite(int numPoints, float size, string seed, int numPolygons)
+        public static Sprite generateSprite(int numPoints, float size, string seed, int numPolygons)
         {
             var geoms = generateGeoms(numPoints, size, seed, numPolygons);
             var sprite = VectorUtils.BuildSprite(geoms, 10.0f, VectorUtils.Alignment.Center, Vector2.zero, 16, true);
@@ -132,12 +141,28 @@ namespace Assets.Scenes.Match.drawer
         }
 
 
-        private static Texture2D generateTexture(int numPoints, float size, string seed, int numPolygons)
+        private static Sprite generateSpriteSVG(int numPoints, float size, string seed, int numPolygons)
         {
-            var sprite = generateSprite(numPoints, size, seed, numPolygons);
-            var texture = VectorUtils.RenderSpriteToTexture2D(sprite, 200, 200, RenderUtil.DEFAULT_MATERIAL, 1, true);
-            return texture;
+
+
+            var tessOptions = new VectorUtils.TessellationOptions()
+            {
+                StepDistance = 100.0f,
+                MaxCordDeviation = 0.5f,
+                MaxTanAngleDeviation = 0.1f,
+                SamplingStepSize = 0.01f
+            };
+
+            // Dynamically import the SVG data, and tessellate the resulting vector scene.
+            var sceneInfo = SVGParser.ImportSVG(new StringReader(SVGs.svg3));
+            var geoms = VectorUtils.TessellateScene(sceneInfo.Scene, tessOptions);
+
+            return VectorUtils.BuildSprite(geoms, 1000f, VectorUtils.Alignment.Center, Vector2.zero, 128, true);
         }
+
+
+        //--------------------- Helper functions ---------------------
+
         // Function to convert a string seed to an integer seed
         private static int StringToSeed(string seedString)
         {
@@ -153,15 +178,6 @@ namespace Assets.Scenes.Match.drawer
             }
         }
 
-
-
-        //--------------------------- Archive ---------------------------//
-
-        public static GameObject createPieceObjectOLD(string name, Vector3 vec, string seed, float size)
-        {
-            GameObject pieceObject = PieceDrawer.generatePieceObject(name, vec, seed, size);
-            return pieceObject;
-        }
 
     }
 }

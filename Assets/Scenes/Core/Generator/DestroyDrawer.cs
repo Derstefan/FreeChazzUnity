@@ -6,18 +6,27 @@ public class DestroyDrawer : MonoBehaviour
 
 
     private static Shader DEFAULT_SHADER = Shader.Find("Sprites/Default");
-    public static void startDestroyAnimation(GameObject gameObject, float power, float fadeOut)
+    public static void startDestroyAnimation2(GameObject gameObject, float power, float fadeOut)
     {
 
         Sprite sprite = gameObject.transform.GetChild(0).gameObject.GetComponent<SpriteRenderer>().sprite;
 
 
-        Destroy(gameObject.transform.GetChild(0).gameObject);
+
+        Vector2[] vertices2D = sprite.vertices[0..(sprite.vertices.Length > 100 ? 100 : sprite.vertices.Length)];
+        ushort[] triangles = sprite.triangles[0..(sprite.vertices.Length > 99 ? 99 : sprite.vertices.Length)];
+
+        Debug.Log("1vertices: " + vertices2D.Length);
+        Debug.Log("1triangles: " + triangles.Length);
         Mesh mesh = new Mesh();
-        mesh.SetVertices(Array.ConvertAll(sprite.vertices, i => (Vector3)i));
+        mesh.SetVertices(Array.ConvertAll(vertices2D, i => (Vector3)i));
         mesh.SetUVs(0, sprite.uv);
-        mesh.SetTriangles(Array.ConvertAll(sprite.triangles, i => (int)i), 0);
-        mesh.colors = Array.ConvertAll(sprite.vertices, i => new Color(0.2f, 0.0f, 0.0f, 1.0f)); // 
+        mesh.SetTriangles(Array.ConvertAll(triangles, i => (int)i), 0);
+
+
+
+        mesh.colors = Array.ConvertAll(vertices2D, i => new Color(UnityEngine.Random.Range(0, 0.3f), UnityEngine.Random.Range(0, 0.3f), UnityEngine.Random.Range(0, 0.3f), 1f)); //
+
 
         GameObject meshObject = new GameObject("MeshPiece");
         meshObject.transform.parent = gameObject.transform;
@@ -26,12 +35,38 @@ public class DestroyDrawer : MonoBehaviour
         meshObject.AddComponent<MeshFilter>().mesh = mesh;
 
 
+        SplitMesh(gameObject.transform, meshObject.transform, power, fadeOut);
         int sub = gameObject.transform.childCount;
         for (int i = 0; i < sub; i++)
         {
-            SplitMesh(gameObject.transform, gameObject.transform.GetChild(i), power, fadeOut);
+            Destroy(gameObject.transform.GetChild(i).gameObject);
         }
+
     }
+
+
+
+    public static void startDestroyAnimation(GameObject gameObject, float power, float fadeOut, float size)
+    {
+
+
+
+        GameObject meshObject = new GameObject("MeshPiece");
+        meshObject.transform.parent = gameObject.transform;
+        meshObject.transform.localPosition = Vector3.zero;
+        meshObject.AddComponent<MeshRenderer>().material = RenderUtil.DEFAULT_MATERIAL;
+        meshObject.AddComponent<MeshFilter>().mesh = createRandomMesh(50, size);
+
+        SplitMesh(gameObject.transform, meshObject.transform, power, fadeOut);
+        int sub = gameObject.transform.childCount;
+        for (int i = 0; i < sub; i++)
+        {
+            Destroy(gameObject.transform.GetChild(i).gameObject);
+        }
+
+    }
+
+
 
     public static void SplitMesh(Transform parent, Transform transform, float power, float fadeOut)
     {
@@ -52,6 +87,10 @@ public class DestroyDrawer : MonoBehaviour
         int[] triangles = mesh.triangles;
         Color[] colors = mesh.colors; // Get the original mesh colors
 
+        Debug.Log("vertices: " + vertices.Length);
+        Debug.Log("triangles: " + triangles.Length);
+        Debug.Log("colors: " + colors.Length);
+
         int partCount = Mathf.Min(1032, Mathf.CeilToInt(triangles.Length / 3f));
         int trianglesPerPart = Mathf.CeilToInt(triangles.Length / (float)partCount);
 
@@ -68,7 +107,7 @@ public class DestroyDrawer : MonoBehaviour
 
             MeshFilter newMeshFilter = newMeshObject.AddComponent<MeshFilter>();
             MeshRenderer newMeshRenderer = newMeshObject.AddComponent<MeshRenderer>();
-            newMeshRenderer.material = new Material(DEFAULT_SHADER);
+            newMeshRenderer.material = RenderUtil.DEFAULT_MATERIAL;
 
             Mesh newMesh = new Mesh();
 
@@ -121,9 +160,61 @@ public class DestroyDrawer : MonoBehaviour
     }
 
 
+    private static Mesh createSquare(float size)
+    {
+        Mesh mesh = new Mesh();
+        mesh.vertices = new Vector3[]
+        {
+            new Vector3(0, 0, 0),
+            new Vector3(0, -1f*size,0),
+            new Vector3(1f*size, -1f*size,0),
+            new Vector3(1f*size, 0,0),
+        };
+        mesh.triangles = new int[] { 0, 1, 2, 0, 2, 3 };
+        mesh.normals = new Vector3[] { Vector3.up, Vector3.up, Vector3.up, Vector3.up };
+        mesh.colors = new Color[] { Color.red, Color.red, Color.red, Color.red };
+        return mesh;
+    }
 
+    private static Mesh createRandomMesh(int n, float size)
+    {
+        Mesh mesh = new Mesh();
+        Vector3[] vertices = new Vector3[n];
+        int[] triangles = new int[(n - 2) * 3]; // Triangulate as a fan
 
+        for (int i = 0; i < n; i++)
+        {
+            float angle = (i / (float)n) * 2 * Mathf.PI;
+            float randomX = UnityEngine.Random.Range(0f, size);
+            float randomY = UnityEngine.Random.Range(0f, size);
 
+            vertices[i] = new Vector3(randomX * Mathf.Cos(angle), randomY * Mathf.Sin(angle), 0);
+
+            if (i >= 2)
+            {
+                int triIndex = (i - 2) * 3;
+                triangles[triIndex] = 0;
+                triangles[triIndex + 1] = i - 1;
+                triangles[triIndex + 2] = i;
+            }
+        }
+
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+
+        // Calculate normals and colors (optional)
+        Vector3[] normals = new Vector3[n];
+        Color[] colors = new Color[n];
+        for (int i = 0; i < n; i++)
+        {
+            normals[i] = Vector3.forward; // You can use other normals as needed.
+            colors[i] = new Color(UnityEngine.Random.Range(0, 0.3f), UnityEngine.Random.Range(0, 0.3f), UnityEngine.Random.Range(0, 0.3f), 1f); // Random color for each vertex (optional).
+        }
+        mesh.normals = normals;
+        mesh.colors = colors;
+
+        return mesh;
+    }
 
 
 }

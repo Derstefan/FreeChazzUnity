@@ -1,19 +1,16 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI%20Toolkit/UnityThemes/menu.uss?fileID=7433441132597879392&amp;guid=f2491e27e3fbe0147b2f2c74d36ad7c3&amp;type=3#menu" />
     <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); align-self: auto;">
-        <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); align-self: auto; justify-content: flex-start; align-items: flex-start; flex-direction: column; flex-wrap: nowrap;">
-            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); align-self: stretch; justify-content: flex-start; height: 42px; width: 92px; align-items: flex-start; flex-wrap: nowrap; overflow: visible; flex-direction: row;">
-                <ui:Button text="Menü" display-tooltip-when-elided="true" name="menu" selectable="true" />
-                <ui:Button text="&lt;" display-tooltip-when-elided="true" name="back" style="align-self: flex-start; align-items: center; justify-content: flex-end; -unity-text-align: upper-left;" />
-                <ui:Label tabindex="-1" text="Turn 0/0" display-tooltip-when-elided="true" name="turn" style="align-self: flex-start;" />
-                <ui:Button text="&gt;" display-tooltip-when-elided="true" name="nextTurn" style="align-self: flex-start;" />
-                <ui:Button text="&gt;&gt;&gt;" display-tooltip-when-elided="true" name="currentTurn" style="align-self: flex-start; justify-content: flex-end; align-items: flex-start;" />
-                <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="log" />
-            </ui:VisualElement>
-        </ui:VisualElement>
-        <ui:VisualElement name="pieceCard" style="flex-grow: 1; background-color: rgb(209, 139, 37); align-self: flex-end; width: 157px; height: 176px; min-width: 300px; min-height: 600px; max-width: 300px; max-height: 1000px; right: 1%; top: auto; bottom: 2%; opacity: 0;">
-            <ui:VisualElement name="pieceView" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); height: 360px; width: 265px; justify-content: flex-start; align-items: stretch; display: flex; align-self: center; min-width: 250px; min-height: 100px; background-image: none; flex-direction: column; flex-wrap: nowrap; max-width: 250px; max-height: 250px; position: absolute; top: 40px; opacity: 1; -unity-background-image-tint-color: rgb(255, 255, 255);" />
-            <ui:VisualElement name="actionView" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); position: absolute; top: 300px; height: 250px; width: 250px; left: 25px;" />
+        <ui:Button text="Menü" display-tooltip-when-elided="true" name="menu" selectable="true" />
+        <ui:Button text="&lt;" display-tooltip-when-elided="true" name="back" style="align-self: flex-start; align-items: center; justify-content: flex-end; -unity-text-align: upper-left;" />
+        <ui:Label tabindex="-1" text="Turn 0/0" display-tooltip-when-elided="true" name="turn" style="align-self: flex-start;" />
+        <ui:Button text="&gt;" display-tooltip-when-elided="true" name="nextTurn" style="align-self: flex-start;" />
+        <ui:Button text="&gt;&gt;&gt;" display-tooltip-when-elided="true" name="currentTurn" style="align-self: flex-start; justify-content: flex-end; align-items: flex-start;" />
+        <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="log" />
+        <ui:VisualElement name="pieceCard" style="flex-grow: 1; background-color: rgb(209, 139, 37); align-self: flex-start; width: 157px; height: 176px; min-width: 300px; min-height: 600px; max-width: 300px; max-height: 1000px; right: auto; top: auto; bottom: 2%; opacity: 0;">
+            <ui:VisualElement name="pieceView" style="flex-grow: 1; background-color: rgb(156, 111, 51); height: 360px; width: 265px; justify-content: flex-start; align-items: stretch; display: flex; align-self: center; min-width: 265px; min-height: 265px; background-image: none; flex-direction: column; flex-wrap: nowrap; max-width: 265px; max-height: 265px; position: relative; top: 40px; opacity: 1; -unity-background-image-tint-color: rgb(255, 255, 255); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(120, 67, 5); border-right-color: rgb(120, 67, 5); border-top-color: rgb(120, 67, 5); border-bottom-color: rgb(120, 67, 5);" />
+            <ui:VisualElement name="actionView" style="flex-grow: 1; background-color: rgba(130, 77, 77, 0.87); position: relative; top: 60px; height: 150px; width: 150px; left: 75px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(156, 131, 8); border-right-color: rgb(156, 131, 8); border-top-color: rgb(156, 131, 8); border-bottom-color: rgb(156, 131, 8); max-height: 150px; max-width: 150px; flex-direction: row;" />
+            <ui:VisualElement name="legendView" style="flex-grow: 1; background-color: rgba(108, 83, 33, 0.96); width: 200px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(219, 167, 119); border-right-color: rgb(219, 167, 119); border-top-color: rgb(219, 167, 119); border-bottom-color: rgb(219, 167, 119); top: 80px; left: 50px; flex-direction: row; height: 100px; max-height: 100px; flex-wrap: wrap;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

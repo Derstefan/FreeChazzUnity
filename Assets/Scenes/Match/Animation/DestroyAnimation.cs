@@ -1,10 +1,8 @@
-﻿using System;
-using UnityEngine;
-
-public class DestroyAnimation : Animation
+﻿public class DestroyAnimation : Animation
 {
     private Piece piece;
     private bool shatterAnimationStarted = false;
+    private float size = 0.3f;
     public DestroyAnimation(Piece piece)
     {
 
@@ -20,17 +18,7 @@ public class DestroyAnimation : Animation
     {
         if (!shatterAnimationStarted)
         {
-            Sprite sprite = piece.gameObject.GetComponent<SpriteRenderer>().sprite;
-
-
-            Mesh mesh = new Mesh();
-            mesh.SetVertices(Array.ConvertAll(sprite.vertices, i => (Vector3)i));
-            mesh.SetUVs(0, sprite.uv);
-            mesh.SetTriangles(Array.ConvertAll(sprite.triangles, i => (int)i), 0);
-
-            piece.gameObject.AddComponent<MeshFilter>().mesh = mesh;
-
-            DestroyDrawer.startDestroyAnimation(piece.gameObject, 0.2f, 3.0f);
+            DestroyDrawer.startDestroyAnimation(piece.gameObject, 0.4f, 3.0f, size);
             shatterAnimationStarted = true;
         }
     }

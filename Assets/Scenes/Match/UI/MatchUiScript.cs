@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Assets.Scenes.Match.drawer;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -13,9 +14,11 @@ public class MatchUiScript : MonoBehaviour
 
     private VisualElement pieceView;
     private VisualElement actionView;
+    private VisualElement legendView;
     private VisualElement pieceCard;
-    public Sprite sprite;
 
+
+    private VisualElement modal;
     private void OnEnable()
     {
         VisualElement root = GetComponent<UIDocument>().rootVisualElement;
@@ -33,12 +36,14 @@ public class MatchUiScript : MonoBehaviour
         pieceView = root.Q<VisualElement>("pieceView");
         actionView = root.Q<VisualElement>("actionView");
         pieceCard = root.Q<VisualElement>("pieceCard");
+        legendView = root.Q<VisualElement>("legendView");
 
 
         b1.clicked += menu;
         b2.clicked += back;
         b3.clicked += nextTurn;
         b4.clicked += jumpToCurrentTurn;
+
     }
 
     private void menu()
@@ -80,20 +85,34 @@ public class MatchUiScript : MonoBehaviour
         label2.text = text;
     }
 
+
+
+    public void hidePiece()
+    {
+        pieceCard.style.opacity = 0;
+    }
+
+
+
     public void showPiece(Piece piece, PieceTypeDTO pieceTypeDTO)
     {
         pieceCard.style.opacity = 1;
         Texture2D renderedPiece = PieceRenderer.render(pieceTypeDTO.pieceTypeId, 100, piece.owner);
 
         actionView.Clear();
+        legendView.Clear();
 
+
+        float actionFiledSize = 10;
+        float actionElementSize = 9;
+        float xOffset = 70;
 
         VisualElement piecePos = new VisualElement();
         piecePos.style.position = Position.Absolute;
-        piecePos.style.left = 0 * 20 + 100;
-        piecePos.style.top = (7 - 0) * 20 + 100;
-        piecePos.style.width = 18;
-        piecePos.style.height = 18;
+        piecePos.style.left = 0 * actionFiledSize + xOffset;
+        piecePos.style.top = (6 - 0) * actionFiledSize;
+        piecePos.style.width = actionElementSize;
+        piecePos.style.height = actionElementSize;
 
         // Customize the element's appearance (e.g., setting background color)
         piecePos.style.backgroundColor = Color.green;
@@ -101,33 +120,51 @@ public class MatchUiScript : MonoBehaviour
         // Add the element to the hierarchy (assuming you have a parent container)
         actionView.Add(piecePos);
 
+        //list of strings
+        List<string> differentActions = new List<string>();
 
         foreach (ActionDTO action in pieceTypeDTO.actions)
         {
             VisualElement element = new VisualElement();
             element.style.position = Position.Absolute;
-            element.style.left = action.vec.x * 20 + 100;
-            element.style.top = (7 - action.vec.y) * 20 + 100;
-            element.style.width = 18;
-            element.style.height = 18;
+            element.style.left = action.vec.x * actionFiledSize + xOffset;
+            element.style.top = (6 - action.vec.y) * actionFiledSize;
+            element.style.width = actionElementSize;
+            element.style.height = actionElementSize;
+            element.RegisterCallback<MouseEnterEvent>(e =>
+            {
+                Debug.Log("Mouse entered the element." + RenderUtil.getActionByType(action.type));
+            });
+
+            element.RegisterCallback<MouseLeaveEvent>(e =>
+            {
+                Debug.Log("Mouse left the element.");
+            });
 
             // Customize the element's appearance (e.g., setting background color)
-            element.style.backgroundColor = GridRenderer.getColorByType(action.type);
+            element.style.backgroundColor = RenderUtil.getColorByType(action.type);
 
             // Add the element to the hierarchy (assuming you have a parent container)
             actionView.Add(element);
             // Store the element in the 2D array
-        }
 
+
+            if (!differentActions.Contains(action.type))
+            {
+                differentActions.Add(action.type);
+                Label label = new Label(RenderUtil.getActionByType(action.type));
+                label.style.top = 0;
+                label.style.fontSize = 10;
+                label.style.color = RenderUtil.getColorByType(action.type);
+                legendView.Add(label);
+            }
+        }
 
 
         pieceView.style.backgroundImage = renderedPiece;
 
-    }
 
 
-    public void hidePiece()
-    {
-        pieceCard.style.opacity = 0;
     }
+
 }

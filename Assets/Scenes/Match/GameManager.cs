@@ -54,7 +54,6 @@ public class GameManager : MonoBehaviour
     public GameObject configObject;
 
     private BoardRenderer boardRenderer;
-    private PieceViewRenderer pieceViewRenderer;
 
     private bool isAnimating = false;
     private Animator animator = null;
@@ -87,7 +86,6 @@ public class GameManager : MonoBehaviour
         boardRenderer = new BoardRenderer(chessboard.transform, width, height, size, updateDataDTO.player1.playerType);
 
 
-        pieceViewRenderer = new PieceViewRenderer(pieceView.transform);
         historyGray = GameObject.Find("HistoryGray").GetComponent<SpriteRenderer>();
         uiScript = GameObject.Find("UIDocument").GetComponent<MatchUiScript>();
 
@@ -132,6 +130,9 @@ public class GameManager : MonoBehaviour
             }
         }
 
+
+
+
         // check for updates
         if (!gameIsOver() && initialLoaded && isUpdating && !isAnimating)
         {
@@ -155,6 +156,9 @@ public class GameManager : MonoBehaviour
                 animator = null;
             }
         }
+
+
+
     }
 
 
@@ -270,7 +274,7 @@ public class GameManager : MonoBehaviour
             PieceTypeDTO pieceTypeDTO = cachedStore.GetPieceTypeDTO(selectedPiece.pieceTypeId);
             if (pieceTypeDTO != null)
             {
-                pieceViewRenderer.render(selectedPiece, pieceTypeDTO);
+                uiScript.showPiece(selectedPiece, cachedStore.GetPieceTypeDTO(selectedPiece.pieceTypeId));
             }
         }
     }
@@ -337,14 +341,12 @@ public class GameManager : MonoBehaviour
             return;
         }
         uiScript.showPiece(selectedPiece, cachedStore.GetPieceTypeDTO(selectedPiece.pieceTypeId));
-        pieceViewRenderer.render(selectedPiece, cachedStore.GetPieceTypeDTO(selectedPiece.pieceTypeId));
     }
 
     private void unselectPiece(int x, int y)
     {
         boardRenderer.removePossibleMoves();
         boardRenderer.removeSelected();
-        pieceViewRenderer.hide();
         uiScript.hidePiece();
         selectedPiece = null;
     }
