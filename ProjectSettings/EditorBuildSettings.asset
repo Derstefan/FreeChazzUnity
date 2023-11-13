@@ -6,10 +6,16 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Menu.unity
+    path: Assets/Scenes/Menu/Menu.unity
     guid: db68893febe2c7d438ecac41a6017c48
   - enabled: 1
-    path: Assets/Scenes/board.unity
+    path: Assets/Scenes/Match.unity
     guid: 97cd8957caae0334ea09a8b03c564220
+  - enabled: 1
+    path: Assets/Scenes/TestGen.unity
+    guid: 11b9d8daf4bf9c047be86d8b8532f909
+  - enabled: 1
+    path: Assets/Scenes/Menu/QuickMatchMenu.unity
+    guid: 2b03a88ae313efc4da302bdd9dac5f00
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
