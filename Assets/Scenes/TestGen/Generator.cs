@@ -12,7 +12,7 @@ public class Generator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        generatedPiece = PieceRenderer.createPieceObject(Util.GenerateRandomString(2), new Vector3(0, 0, -10), Util.GenerateRandomString(20), 2);
+        generatedPiece = PieceRenderer.createPieceObject(Util.GenerateRandomString(2), new Vector3(0, 0, -10), PieceTypeId.createRandomPieceTypeId(), 2, true);
         generatedPiece.transform.parent = pieceView.transform;
         generatedPiece.transform.localPosition = Vector3.zero;
     }
@@ -24,7 +24,7 @@ public class Generator : MonoBehaviour
         {
             DestroyDrawer.startDestroyAnimation(generatedPiece.gameObject, 8.3f, 1.0f, size);
             Destroy(generatedPiece);
-            generatedPiece = PieceRenderer.createPieceObject(Util.GenerateRandomString(2), new Vector3(0, 0, -10), Util.GenerateRandomString(20), 2);
+            generatedPiece = PieceRenderer.createPieceObject(Util.GenerateRandomString(2), new Vector3(0, 0, -10), PieceTypeId.createRandomPieceTypeId(), 2, true);
             generatedPiece.transform.parent = pieceView.transform;
             generatedPiece.transform.localPosition = Vector3.zero;
 

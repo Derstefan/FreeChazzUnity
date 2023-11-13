@@ -27,7 +27,7 @@ public class Animator
                         (eventDTO.toPos.invertY().GetVector3(-10f) + new Vector3(0.5f, -0.5f, -10f)) * gameManager.size));
                     break;
                 case "DESTROY":
-                    animations.Add(new DestroyAnimation(gameManager.getPieceById(eventDTO.pieceId)));
+                    animations.Add(new DestroyAnimation(gameManager.getPieceById(eventDTO.pieceId), gameManager.size));
                     break;
                 case "SWAP":
                     animations.Add(new SwapAnimation(gameManager, eventDTO));
@@ -36,7 +36,7 @@ public class Animator
                     animations.Add(new MoveAndDestroyAnimation(gameManager.getPieceById(eventDTO.pieceId),
                        (eventDTO.fromPos.invertY().GetVector3(-10f) + new Vector3(0.5f, -0.5f, -10f)) * gameManager.size,
                        (eventDTO.toPos.invertY().GetVector3(-10f) + new Vector3(0.5f, -0.5f, -10f)) * gameManager.size,
-                       gameManager.getPieceById(eventDTO.targetPieceId)));
+                       gameManager.getPieceById(eventDTO.targetPieceId), gameManager.size));
                     break;
                 default:
                     // animations[i] = new DestroyAnimation(piece);

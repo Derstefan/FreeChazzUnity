@@ -12,9 +12,9 @@ public class MoveAndDestroyAnimation : Animation
     private Piece targetPiece;
 
     private bool shatterAnimationStarted = false;
-    private float size = 0.3f;
+    private float size;
 
-    public MoveAndDestroyAnimation(Piece piece, Vector3 startPosition, Vector3 endPosition, Piece targetPiece)
+    public MoveAndDestroyAnimation(Piece piece, Vector3 startPosition, Vector3 endPosition, Piece targetPiece, float size)
     {
         this.transform = piece.gameObject.transform;
         this.startPosition = startPosition;
@@ -22,6 +22,7 @@ public class MoveAndDestroyAnimation : Animation
         this.targetPiece = targetPiece;
         duration = 0.15f + Vector3.Distance(startPosition, endPosition) * 1.04f;
         progressTime = 0f;
+        this.size = size;
     }
 
 
@@ -35,7 +36,7 @@ public class MoveAndDestroyAnimation : Animation
         transform.position = Vector3.Lerp(startPosition, endPosition, t);
         if (!shatterAnimationStarted && t > shatterAnimationStartPoint)
         {
-            DestroyDrawer.startDestroyAnimation(targetPiece.gameObject, 0.4f, 3.0f, size);
+            DestroyDrawer.startDestroyAnimation(targetPiece.gameObject, 0.4f, 1.5f, size);
             shatterAnimationStarted = true;
         }
     }

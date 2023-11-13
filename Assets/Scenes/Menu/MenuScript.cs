@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
@@ -7,39 +5,29 @@ using UnityEngine.UIElements;
 public class MenuScript : MonoBehaviour
 {
 
-    private void OnEnable(){
+    private void OnEnable()
+    {
         VisualElement root = GetComponent<UIDocument>().rootVisualElement;
 
-
-        Button startButton = root.Q<Button>("start");
-        Button startBotButton = root.Q<Button>("startBot");
+        Button playMatchButton = root.Q<Button>("playMatch");
         Button generatorButton = root.Q<Button>("generator");
         Button quitButton = root.Q<Button>("quit");
 
-        startButton.clicked+=startTestGame;
-        startBotButton.clicked+= startTestBotGame;
-        generatorButton.clicked+=generatorScene;
-        quitButton.clicked+=exitGame;
+        playMatchButton.clicked += playMatch;
+        generatorButton.clicked += generatorScene;
+        quitButton.clicked += exitGame;
     }
 
-
-    private void startTestGame()
+    private void playMatch()
     {
-        Params.isHotSeat = true;
-        SceneManager.LoadScene(1);
-    }
 
-    private void startTestBotGame()
-    {
-        Params.isHotSeat = false;
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene("QuickMatchMenu");
     }
 
     private void generatorScene()
     {
-        SceneManager.LoadScene(2);
+        SceneManager.LoadScene("TestGen");
     }
-
 
     private void exitGame()
     {

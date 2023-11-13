@@ -2,13 +2,14 @@
 {
     private Piece piece;
     private bool shatterAnimationStarted = false;
-    private float size = 0.3f;
-    public DestroyAnimation(Piece piece)
+    private float size;
+    public DestroyAnimation(Piece piece, float size)
     {
 
         duration = 0.25f;
         progressTime = 0f;
         this.piece = piece;
+        this.size = size;
     }
 
 
@@ -18,7 +19,7 @@
     {
         if (!shatterAnimationStarted)
         {
-            DestroyDrawer.startDestroyAnimation(piece.gameObject, 0.4f, 3.0f, size);
+            DestroyDrawer.startDestroyAnimation(piece.gameObject, 0.4f, 1.5f, size);
             shatterAnimationStarted = true;
         }
     }

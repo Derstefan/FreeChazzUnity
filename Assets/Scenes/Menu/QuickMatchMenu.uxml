@@ -1,0 +1,34 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/UnityThemes/menu.uss?fileID=7433441132597879392&amp;guid=f2491e27e3fbe0147b2f2c74d36ad7c3&amp;type=3#menu" />
+    <ui:VisualElement name="VisualElement" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); height: auto; max-height: 10%;">
+        <ui:Button text="back" display-tooltip-when-elided="true" name="menu" style="align-self: flex-start;" />
+    </ui:VisualElement>
+    <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; align-items: center; flex-direction: row; max-height: 10%;">
+        <ui:Button name="hotSeat" text="Local 1vs1" parse-escape-sequences="false" style="margin-right: 10px;" />
+        <ui:Button name="botGame" text="vs machine" style="margin-right: 10px;" />
+        <ui:Button name="onlineGame" text="online game" style="margin-right: 10px;" />
+        <ui:Button name="automaticGame" text="automatic Game" style="margin-right: 10px;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="sizesContainer" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; align-items: center; flex-direction: row; max-height: 10%; display: flex;">
+        <ui:Button name="tiny" text="tiny" parse-escape-sequences="false" style="margin-right: 10px;" />
+        <ui:Button name="small" text="small" style="margin-right: 10px;" />
+        <ui:Button name="medium" text="medium" style="margin-right: 10px;" />
+        <ui:Button name="big" text="big" style="margin-right: 10px;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="moreContainer" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; align-items: center; flex-direction: row; max-height: 10%;">
+        <ui:Button name="more" text="... more" parse-escape-sequences="false" style="margin-right: 10px; font-size: 12px; height: 20px; width: 100px;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="seedContainer" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; align-items: center; flex-direction: row; max-height: 5%; display: none;">
+        <ui:Toggle label="special seed" name="seedToggle" />
+        <ui:TextField picking-mode="Ignore" name="seedTextField" is-delayed="false" focusable="true" placeholder-text="seed" style="max-width: 20%; display: none; visibility: visible;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="sameContainer" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; align-items: center; flex-direction: row; max-height: 10%; display: none;">
+        <ui:Toggle label="same pieces" name="sameToggle" value="true" style="display: flex;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="publicContainer" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; align-items: center; flex-direction: row; max-height: 5%; display: none;">
+        <ui:Toggle label="public game" name="publicToggle" style="-unity-background-image-tint-color: rgb(219, 145, 11);" />
+    </ui:VisualElement>
+    <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; align-items: center; flex-direction: row; max-height: 20%;">
+        <ui:Button name="start" text="Start" parse-escape-sequences="false" style="margin-right: 10px; font-size: 25px; height: 57px; width: 206px;" />
+    </ui:VisualElement>
+</ui:UXML>

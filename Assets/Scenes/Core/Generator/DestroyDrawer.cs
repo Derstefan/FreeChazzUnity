@@ -5,7 +5,7 @@ public class DestroyDrawer : MonoBehaviour
 {
 
 
-    private static Shader DEFAULT_SHADER = Shader.Find("Sprites/Default");
+
     public static void startDestroyAnimation2(GameObject gameObject, float power, float fadeOut)
     {
 
@@ -16,8 +16,6 @@ public class DestroyDrawer : MonoBehaviour
         Vector2[] vertices2D = sprite.vertices[0..(sprite.vertices.Length > 100 ? 100 : sprite.vertices.Length)];
         ushort[] triangles = sprite.triangles[0..(sprite.vertices.Length > 99 ? 99 : sprite.vertices.Length)];
 
-        Debug.Log("1vertices: " + vertices2D.Length);
-        Debug.Log("1triangles: " + triangles.Length);
         Mesh mesh = new Mesh();
         mesh.SetVertices(Array.ConvertAll(vertices2D, i => (Vector3)i));
         mesh.SetUVs(0, sprite.uv);
@@ -55,7 +53,7 @@ public class DestroyDrawer : MonoBehaviour
         meshObject.transform.parent = gameObject.transform;
         meshObject.transform.localPosition = Vector3.zero;
         meshObject.AddComponent<MeshRenderer>().material = RenderUtil.DEFAULT_MATERIAL;
-        meshObject.AddComponent<MeshFilter>().mesh = createRandomMesh(50, size);
+        meshObject.AddComponent<MeshFilter>().mesh = createRandomMesh(50, size * 0.4f);
 
         SplitMesh(gameObject.transform, meshObject.transform, power, fadeOut);
         int sub = gameObject.transform.childCount;
@@ -86,10 +84,6 @@ public class DestroyDrawer : MonoBehaviour
         Vector3[] vertices = mesh.vertices;
         int[] triangles = mesh.triangles;
         Color[] colors = mesh.colors; // Get the original mesh colors
-
-        Debug.Log("vertices: " + vertices.Length);
-        Debug.Log("triangles: " + triangles.Length);
-        Debug.Log("colors: " + colors.Length);
 
         int partCount = Mathf.Min(1032, Mathf.CeilToInt(triangles.Length / 3f));
         int trianglesPerPart = Mathf.CeilToInt(triangles.Length / (float)partCount);

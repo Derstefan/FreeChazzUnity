@@ -5,6 +5,13 @@ using UnityEngine;
 public class BoardRenderer : MonoBehaviour
 {
 
+
+    public static float Z_BOARD = 3f;
+    public static float Z_PIECE = -10f;
+    public static float Z_AURA = -1f; //relative from the Z_PIECE
+    public static float Z_POSSIBLE_MOVE = -5f;
+    public static float Z_SELECTED_MOVE_SMALL_SQUARE = -1f; //relative from the Z_POSSIBLE_MOVE
+
     private Mesh mesh;
     private Mesh meshSmall;
     private float smallScale = 0.6f;
@@ -24,9 +31,10 @@ public class BoardRenderer : MonoBehaviour
     private string player;
 
 
-    private static Material vertexColorMaterial = new Material(Shader.Find("Sprites/Default"));
+    private static Material vertexColorMaterial = RenderUtil.DEFAULT_MATERIAL;
 
     public GameObject aura;
+    public GameObject auraEnemy;
 
 
     public BoardRenderer(Transform transform, int width, int height, float size, string player)
@@ -40,7 +48,9 @@ public class BoardRenderer : MonoBehaviour
         this.player = player;
 
         this.aura = createOwnerAura(size, Color.black);
+        this.auraEnemy = createOwnerAura(size, new Color(0.8f, 0.1f, 0.1f));
         aura.SetActive(false);
+        auraEnemy.SetActive(false);
     }
 
 
@@ -57,15 +67,14 @@ public class BoardRenderer : MonoBehaviour
     //Create a GameObject for a Piece and connect it to the Piece object
     public void CreateAndConnectGameObject(Piece piece)
     {
-        Vector3 vec = new Vector3(piece.pos.x * size + size / 2f, -piece.pos.y * size - size / 2f, -1);
-        GameObject gameObject = PieceRenderer.createPieceObject(piece.pieceId, vec, piece.pieceTypeId.pieceTypeId, size);
+        Vector3 vec = new Vector3(piece.pos.x * size + size / 2f, -piece.pos.y * size - size / 2f, Z_PIECE);
+        GameObject gameObject = PieceRenderer.createPieceObject(piece.pieceId, vec, piece.pieceTypeId, size, piece.owner == "P1");
         gameObject.transform.parent = transform.GetChild(1).transform;
 
-        //GameObject ownerAura = piece.owner == player ? Instantiate(aura) : Instantiate(aura);
-        GameObject ownerAura = Instantiate(aura);
-        ownerAura.SetActive(true);
-        ownerAura.transform.parent = gameObject.transform;
-        ownerAura.transform.localPosition = Vector3.zero;
+        GameObject shaddow = piece.owner == player ? Instantiate(aura) : Instantiate(auraEnemy);
+        shaddow.SetActive(true);
+        shaddow.transform.parent = gameObject.transform;
+        shaddow.transform.localPosition = new Vector3(0f, 0f, Z_AURA);
 
 
         piece.gameObject = gameObject;
@@ -92,7 +101,7 @@ public class BoardRenderer : MonoBehaviour
             {
                 GameObject square = new GameObject("Square (" + i + "," + j + ")");
                 square.transform.parent = transform.GetChild(0).transform;
-                square.transform.localPosition = new Vector3(i * size, -j * size, 0);
+                square.transform.localPosition = new Vector3(i * size, -j * size, Z_BOARD);
 
                 MeshFilter meshFilter = square.AddComponent<MeshFilter>();
                 MeshRenderer meshRenderer = square.AddComponent<MeshRenderer>();
@@ -111,13 +120,13 @@ public class BoardRenderer : MonoBehaviour
     {
         foreach (ActionPos pos in moveSet.possibleMoves)
         {
-            possibleSquares.Add(createPossibleMoveSquare("PossibleMove (" + pos.x + "," + pos.y + ")", transform.GetChild(0).transform, new Vector3(pos.x * size, -pos.y * size, -10.1f), pos.tag, isOwner));
+            possibleSquares.Add(createPossibleMoveSquare("PossibleMove (" + pos.x + "," + pos.y + ")", transform.GetChild(0).transform, new Vector3(pos.x * size, -pos.y * size, Z_POSSIBLE_MOVE), pos.tag, isOwner));
         }
     }
 
     public void drawSelected(Pos piecePos, bool isOwner)
     {
-        selectedPiece = createPossibleMoveSquare("PiecePos (" + piecePos.x + "," + piecePos.y + ")", transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size, -10.1f), "TODO:tag", isOwner);
+        selectedPiece = createPossibleMoveSquare("PiecePos (" + piecePos.x + "," + piecePos.y + ")", transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size, Z_POSSIBLE_MOVE), "TODO:tag", isOwner);
     }
 
     public void removePossibleMoves()
@@ -140,13 +149,13 @@ public class BoardRenderer : MonoBehaviour
     {
         foreach (ActionPos pos in moveSet.possibleMoves)
         {
-            mouseOverpossibleSquares.Add(createPossibleMoveSquare("PossibleMove (" + pos.x + "," + pos.y + ")", transform.GetChild(0).transform, new Vector3(pos.x * size, -pos.y * size, -10.1f), pos.tag, isOwner));
+            mouseOverpossibleSquares.Add(createPossibleMoveSquare("PossibleMove (" + pos.x + "," + pos.y + ")", transform.GetChild(0).transform, new Vector3(pos.x * size, -pos.y * size, Z_POSSIBLE_MOVE), pos.tag, isOwner));
         }
     }
 
     public void drawMouseOverSelected(Pos piecePos, bool isOwner)
     {
-        mouseOverPiece = createPossibleMoveSquare("PiecePos (" + piecePos.x + "," + piecePos.y + ")", transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size, -10.1f), "TODO:tag", isOwner);
+        mouseOverPiece = createPossibleMoveSquare("PiecePos (" + piecePos.x + "," + piecePos.y + ")", transform.GetChild(0).transform, new Vector3(piecePos.x * size, -piecePos.y * size, Z_POSSIBLE_MOVE), "TODO:tag", isOwner);
     }
 
     public void removeMouseOverPossibleMoves()
@@ -176,7 +185,7 @@ public class BoardRenderer : MonoBehaviour
         //actioncolor square
         GameObject square = new GameObject(name);
         square.transform.parent = parentSquare.transform;
-        square.transform.localPosition = new Vector3((1f - smallScale) * size * 0.5f, -(1f - smallScale) * size * 0.5f, -20f);
+        square.transform.localPosition = new Vector3((1f - smallScale) * size * 0.5f, -(1f - smallScale) * size * 0.5f, Z_SELECTED_MOVE_SMALL_SQUARE);
 
         MeshFilter meshFilter = square.AddComponent<MeshFilter>();
         MeshRenderer meshRenderer = square.AddComponent<MeshRenderer>();

@@ -48,7 +48,7 @@ public class MatchUiScript : MonoBehaviour
 
     private void menu()
     {
-        SceneManager.LoadScene(0);
+        SceneManager.LoadScene("Menu");
     }
 
     private void back()
@@ -77,7 +77,14 @@ public class MatchUiScript : MonoBehaviour
 
     public void updateTurn()
     {
-        label.text = "Turn " + gameManager.gameState.turn + "/" + gameManager.gameState.maxTurns;
+        if (gameManager.gameState.turn == gameManager.gameState.maxTurns)
+        {
+            label.text = "Turn " + gameManager.gameState.turn;
+        }
+        else
+        {
+            label.text = "Turn " + gameManager.gameState.turn + "/" + gameManager.gameState.maxTurns;
+        }
     }
 
     public void writeLog(string text)
@@ -97,7 +104,7 @@ public class MatchUiScript : MonoBehaviour
     public void showPiece(Piece piece, PieceTypeDTO pieceTypeDTO)
     {
         pieceCard.style.opacity = 1;
-        Texture2D renderedPiece = PieceRenderer.render(pieceTypeDTO.pieceTypeId, 100, piece.owner);
+        Texture2D renderedPiece = PieceRenderer.render(pieceTypeDTO.pieceTypeId, 5f, piece.owner == "P1");
 
         actionView.Clear();
         legendView.Clear();

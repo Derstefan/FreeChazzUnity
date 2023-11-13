@@ -14,7 +14,7 @@ Button:hover {
 }
 
 Button:active {
-    background-color: rgb(244, 229, 196);
+    background-color: rgb(238, 188, 78);
 }
 
 Button Label {

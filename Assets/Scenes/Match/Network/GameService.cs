@@ -1,10 +1,53 @@
 using System;
 using System.Collections;
+using System.Text;
+using Assets.Scenes.Match.Interfaces.DTOs.GameParams;
 using UnityEngine;
 using UnityEngine.Networking;
 
 public class GameService
 {
+
+
+
+
+    public static IEnumerator createGame2(RandomGameParams randomGameParams, Action<UpdateDataDTO> callback)
+    {
+        // Convert RandomGameParams to JSON
+        string jsonParams = JsonUtility.ToJson(randomGameParams);
+
+        Debug.Log(jsonParams);
+        // Define the URL based on the hot seat status
+        string url = "http://127.0.0.1:8080/api/test/newgame2";
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+
+        // Set the request body content type to JSON
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        // Convert the JSON payload to bytes and attach it to the request
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonParams);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+
+        // Set the download handler to handle the response
+        request.downloadHandler = new DownloadHandlerBuffer();
+
+        // Send the request and wait for a response
+        yield return request.SendWebRequest();
+
+        // Check for errors
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.Log(request.error);
+        }
+        else
+        {
+            UpdateDataDTO updateDataDTO = JsonUtility.FromJson<UpdateDataDTO>(request.downloadHandler.text);
+            Debug.Log(request.downloadHandler.text);
+            callback(updateDataDTO);
+        }
+    }
+
 
 
     //create Game

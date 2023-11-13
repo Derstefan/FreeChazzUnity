@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     //data about the game
     private string gameId;
     private string playerType; //is the current player
+    private bool isHotSeat;
 
     // Gamestate
     public GameState gameState;
@@ -66,7 +67,8 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         config = configObject.GetComponent<Config>();
-        StartCoroutine(GameService.createGame(Params.isHotSeat, initGame));
+        StartCoroutine(GameService.createGame2(Params.randomGameParams, initGame));
+        isHotSeat = !Params.randomGameParams.isNetworkGame && !Params.randomGameParams.isBotEnemy;
     }
 
     //first load of data
@@ -134,7 +136,7 @@ public class GameManager : MonoBehaviour
 
 
         // check for updates
-        if (!gameIsOver() && initialLoaded && isUpdating && !isAnimating)
+        if (!gameIsOver() && initialLoaded && isUpdating && (!isAnimating || Params.randomGameParams.isAutomatic))
         {
             timer += Time.deltaTime;
             if (timer >= updateCheckInterval)
@@ -165,12 +167,7 @@ public class GameManager : MonoBehaviour
 
     private void UpdateMatchDataWithAnimation(UpdateDataDTO updateData)
     {
-        if (updateData.winner != "")
-        {
-            winner = updateData.winner;
-            uiScript.writeLog("winner is " + updateData.winner);
-            return;
-        }
+
 
         if (updateData.pieceDTOs == null || updateData.pieceDTOs.Length == 0 || isAnimating)
         {
@@ -178,11 +175,18 @@ public class GameManager : MonoBehaviour
         }
 
 
-
         //Debug.Log(" ------------------------------ new Board Update turn:" + updateData.turn);
         if (gameState.turn + 1 == updateData.turn && updateData.drawEvent != null)
         {
             startAnimation(updateData);
+        }
+
+        if (updateData.winner != "")
+        {
+            winner = updateData.winner;
+            uiScript.writeLog("winner is " + updateData.winner);
+            StartCoroutine(SmoothlyChangeAlpha(0.4f, 0.5f));
+            return;
         }
 
         gameState.turn = updateData.turn;
@@ -194,7 +198,7 @@ public class GameManager : MonoBehaviour
         }
         gameState.nextTurn = updateData.nextTurn;
         uiScript.updateTurn();
-        if (Params.isHotSeat)
+        if (isHotSeat)
         {
             playerType = updateData.nextTurn;
         }
@@ -310,7 +314,10 @@ public class GameManager : MonoBehaviour
     {
         if (isPossibleMove(x, y))
         {
-            play(x, y);
+            if (!Params.randomGameParams.isAutomatic)
+            {
+                play(x, y);
+            }
         }
         else if (gameState.pieces[x, y] != null)
         {
@@ -329,6 +336,7 @@ public class GameManager : MonoBehaviour
         selectedPiece = gameState.pieces[x, y];
         boardRenderer.removePossibleMoves();
         boardRenderer.removeSelected();
+
         bool isOwner = selectedPiece.owner == playerTurn();
         boardRenderer.drawPossibleMoves(
             selectedPiece.moveSet, isOwner);
@@ -342,6 +350,8 @@ public class GameManager : MonoBehaviour
         }
         uiScript.showPiece(selectedPiece, cachedStore.GetPieceTypeDTO(selectedPiece.pieceTypeId));
     }
+
+
 
     private void unselectPiece(int x, int y)
     {
@@ -472,7 +482,7 @@ public class GameManager : MonoBehaviour
 
     private string playerTurn()
     {
-        if (Params.isHotSeat)
+        if (isHotSeat)
         {
             return gameState.nextTurn;
         }
@@ -549,5 +559,24 @@ public class GameManager : MonoBehaviour
         Color finalColor = historyGray.color;
         finalColor.a = targetAlpha;
         historyGray.color = finalColor;
+    }
+
+
+
+    IEnumerator ScaleOverTime(Transform tra, float targetScaleX, float targetScaleY, float duration)
+    {
+        Vector3 originalScale = tra.localScale;
+        Vector3 targetScale = new Vector3(targetScaleX, targetScaleY, originalScale.z);
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
+        {
+            tra.localScale = Vector3.Lerp(originalScale, targetScale, elapsedTime / duration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        tra.localScale = targetScale; // Ensure that the scale is exactly the target scale at the end
     }
 }
