@@ -1,7 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 [Serializable]
 public class PieceDTO
@@ -13,6 +10,7 @@ public class PieceDTO
     public string symbol;
     public MoveSet moveSet;
     public string owner;
+    public bool king;
 
     public string ToString()
     {

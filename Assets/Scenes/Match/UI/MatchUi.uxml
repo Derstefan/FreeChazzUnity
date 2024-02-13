@@ -13,4 +13,5 @@
             <ui:VisualElement name="legendView" style="flex-grow: 1; background-color: rgba(108, 83, 33, 0.96); width: 200px; border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(219, 167, 119); border-right-color: rgb(219, 167, 119); border-top-color: rgb(219, 167, 119); border-bottom-color: rgb(219, 167, 119); top: 80px; left: 50px; flex-direction: row; height: 100px; max-height: 100px; flex-wrap: wrap;" />
         </ui:VisualElement>
     </ui:VisualElement>
+    <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="gameId" selectable="true" />
 </ui:UXML>

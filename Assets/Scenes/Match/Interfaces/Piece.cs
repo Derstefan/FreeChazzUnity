@@ -1,12 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 
 public class Piece
 {
     public string pieceId;
-        //PieceTypeData
+    //PieceTypeData
     public PieceTypeId pieceTypeId;
 
     public Pos pos;
@@ -14,8 +12,11 @@ public class Piece
     public MoveSet moveSet;
     public string owner;
 
+    public bool isKing;
+
     public GameObject gameObject;
 
+    public bool showsMoveSet = true;
 
     public Piece(PieceDTO pieceDTO)
     {
@@ -25,19 +26,21 @@ public class Piece
         symbol = pieceDTO.symbol;
         moveSet = pieceDTO.moveSet;
         owner = pieceDTO.owner;
+        isKing = pieceDTO.king;
     }
 
 
-    public void assignGameObject(GameObject obj){
+    public void assignGameObject(GameObject obj)
+    {
         gameObject = obj;
     }
 
-//        public static Piece mockPiece1 =  new Piece(PieceDTO.mockPieceDTO1);
-//        public static Piece mockPiece2 =  new Piece(PieceDTO.mockPieceDTO2);
-    
+    //        public static Piece mockPiece1 =  new Piece(PieceDTO.mockPieceDTO1);
+    //        public static Piece mockPiece2 =  new Piece(PieceDTO.mockPieceDTO2);
+
 
     public string toString()
     {
-        return "Piece: "+pieceId+" "+pieceTypeId+" "+pos+" "+symbol+" "+moveSet+" "+owner;
+        return "Piece: " + pieceId + " " + pieceTypeId + " " + pos + " " + symbol + " " + moveSet + " " + owner;
     }
 }

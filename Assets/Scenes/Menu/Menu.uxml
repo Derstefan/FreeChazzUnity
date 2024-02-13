@@ -2,10 +2,13 @@
     <Style src="project://database/Assets/UI%20Toolkit/UnityThemes/menu.uss?fileID=7433441132597879392&amp;guid=f2491e27e3fbe0147b2f2c74d36ad7c3&amp;type=3#menu" />
     <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
         <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; align-items: center;">
-            <ui:Button text="Play Match" display-tooltip-when-elided="true" name="playMatch" />
+            <ui:Label tabindex="-1" display-tooltip-when-elided="true" name="hello" />
+            <ui:Button text="continue" display-tooltip-when-elided="true" name="continue" style="display: none; margin-bottom: 20px;" />
+            <ui:Button text="New Match" display-tooltip-when-elided="true" name="playMatch" />
             <ui:Button text="Join Game" display-tooltip-when-elided="true" name="joinGame" />
             <ui:Button text="PieceGenerator" display-tooltip-when-elided="true" name="generator" />
-            <ui:Button text="Quit" display-tooltip-when-elided="true" name="quit" />
+            <ui:Button text="Playground" display-tooltip-when-elided="true" name="playground" />
+            <ui:Button text="Logout" display-tooltip-when-elided="true" name="quit" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

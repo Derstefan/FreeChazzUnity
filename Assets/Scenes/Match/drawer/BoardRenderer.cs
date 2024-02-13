@@ -77,7 +77,29 @@ public class BoardRenderer : MonoBehaviour
         shaddow.transform.localPosition = new Vector3(0f, 0f, Z_AURA);
 
 
+        // Check if the piece is a king and add a shadow at the bottom
+        if (piece.isKing)
+        {
+            Debug.Log("King");
+            GameObject shadow = Instantiate(aura); // Assuming the aura prefab is suitable for shadow
+            shadow.SetActive(true);
+            shadow.transform.parent = gameObject.transform;
+            shadow.transform.localPosition = new Vector3(0f, -size / 2f, Z_AURA); // Position at the bottom
+        }
+
         piece.gameObject = gameObject;
+    }
+
+
+    public void switchOwner(Piece piece)
+    {
+        //Destroy the old aura
+        Destroy(piece.gameObject.transform.GetChild(0).gameObject);
+        //Create the new aura
+        GameObject shaddow = piece.owner == player ? Instantiate(aura) : Instantiate(auraEnemy);
+        shaddow.SetActive(true);
+        shaddow.transform.parent = piece.gameObject.transform;
+        shaddow.transform.localPosition = new Vector3(0f, 0f, Z_AURA);
     }
 
 

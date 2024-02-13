@@ -22,7 +22,6 @@ public class QuickMatchMenuScript : MonoBehaviour
     private Toggle seedToggle;
     private TextField seedTextField;
     private Toggle sameToggle;
-    private Toggle publicToggle;
     private Button startButton;
 
     public Color selectedColor;
@@ -55,7 +54,6 @@ public class QuickMatchMenuScript : MonoBehaviour
         seedToggle = root.Q<Toggle>("seedToggle");
         seedTextField = root.Q<TextField>("seedTextField");
         sameToggle = root.Q<Toggle>("sameToggle");
-        publicToggle = root.Q<Toggle>("publicToggle");
         startButton = root.Q<Button>("start");
 
 
@@ -72,14 +70,12 @@ public class QuickMatchMenuScript : MonoBehaviour
         seedToggle.RegisterValueChangedCallback(OnSeedToggleValueChanged);
         seedTextField.RegisterValueChangedCallback(OnSeedTextFieldValueChanged);
         sameToggle.RegisterValueChangedCallback(OnSameToggleValueChanged);
-        publicToggle.RegisterValueChangedCallback(OnPublicToggleValueChanged);
         startButton.clicked += OnStartButtonClick;
 
 
         OnTinyButtonClick();
         OnBotGameButtonClick();
 
-        randomGameParams.isPublic = true;
         randomGameParams.samePieces = true;
     }
 
@@ -210,14 +206,25 @@ public class QuickMatchMenuScript : MonoBehaviour
         randomGameParams.samePieces = sameToggle.value;
     }
 
-    private void OnPublicToggleValueChanged(ChangeEvent<bool> evt)
-    {
-        randomGameParams.isPublic = publicToggle.value;
-    }
-
     private void OnStartButtonClick()
     {
-        Params.randomGameParams = randomGameParams;
+        StartCoroutine(GameService.createGame(randomGameParams, initGame));
+    }
+
+    private void initGame(string gameId)
+    {
+        PlayerPrefs.SetString("gameId", gameId);
+        StartCoroutine(GameService.getAllMatchesOfUser(startMatch));
+    }
+
+    private void startMatch(MatchDataCollection matchDataCollection)
+    {
+        Params.clearMatchData();
+        foreach (MatchData matchData in matchDataCollection.matchDatas)
+        {
+            Params.addMatchData(matchData);
+        }
+
         SceneManager.LoadScene("Match");
     }
 

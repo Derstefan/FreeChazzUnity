@@ -4,14 +4,9 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    //data about me
-    private string userid;
-    private string token;
-
-    //data about the game
-    private string gameId;
     private string playerType; //is the current player
     private bool isHotSeat;
+    private bool isAutomatic;
 
     // Gamestate
     public GameState gameState;
@@ -22,7 +17,12 @@ public class GameManager : MonoBehaviour
 
     private Piece selectedPiece;
     private Piece mouseOverPiece;
+    private Pos playSelectedPos; // 2 click check für aktion
 
+    private bool isInHistory = false;
+    private bool initialLoaded = false;
+    private bool isUpdating = true;
+    private bool isAnimating = false;
 
     //cached data
     private CachedStore cachedStore = new CachedStore();
@@ -30,8 +30,7 @@ public class GameManager : MonoBehaviour
 
 
     //History
-    private History history = new History();
-    private bool isInHistory = false;
+    public History history = new History();
 
 
     //technical stuff
@@ -43,8 +42,7 @@ public class GameManager : MonoBehaviour
     private float timer = 0.0f;
     private float updateCheckInterval = 0.5f;
 
-    private bool initialLoaded = false;
-    private bool isUpdating = true;
+
 
     private float mouseX = 0;
     private float mouseY = 0;
@@ -56,22 +54,55 @@ public class GameManager : MonoBehaviour
 
     private BoardRenderer boardRenderer;
 
-    private bool isAnimating = false;
     private Animator animator = null;
 
     private SpriteRenderer historyGray;
     private MatchUiScript uiScript;
 
-
+    private MatchData matchData;
 
     void Start()
     {
+        historyGray = GameObject.Find("HistoryGray").GetComponent<SpriteRenderer>();
+        uiScript = GameObject.Find("UIDocument").GetComponent<MatchUiScript>();
+
+
+        string gameId = PlayerPrefs.GetString("gameId");
+
+        uiScript.setGameId(gameId);
+        matchData = Params.getMatchDataByGameId(gameId);
+        if (matchData == null)
+        {
+            Debug.LogError("no matchData found");
+            return;
+        }
         config = configObject.GetComponent<Config>();
-        StartCoroutine(GameService.createGame2(Params.randomGameParams, initGame));
-        isHotSeat = !Params.randomGameParams.isNetworkGame && !Params.randomGameParams.isBotEnemy;
+
+        width = matchData.width;
+        height = matchData.height;
+        size = config.maxBoardSize / (float)height;
+        gameState = new GameState(width, height);
+
+
+
+        isHotSeat = !matchData.p1IsBot && !matchData.p2IsBot;
+        isAutomatic = matchData.p1IsBot && matchData.p2IsBot;
+        gameState.turn = matchData.turns;
+
+        for (int i = 0; i < gameState.turn; i++)
+        {
+            StartCoroutine(GameService.checkUpdate(gameId, i, history.Add));
+        }
+
+        gameState.nextTurn = matchData.playerTurn;
+        gameState.maxLoadedTurn = matchData.maxTurns;
+
+        uiScript.updateTurn();
+
+        StartCoroutine(GameService.checkUpdate(gameId, gameState.turn, UpdateMatchDataWithAnimation));
+
     }
 
-    //first load of data
     void initGame(UpdateDataDTO updateDataDTO)
     {
         if (updateDataDTO == null)
@@ -79,25 +110,23 @@ public class GameManager : MonoBehaviour
             Debug.LogError("no connection");
             initialLoaded = false;
         }
-        width = updateDataDTO.width;
-        height = updateDataDTO.height;
-        size = config.maxBoardSize / (float)height;
 
-        gameState = new GameState(width, height);
+
+
+
+
 
         boardRenderer = new BoardRenderer(chessboard.transform, width, height, size, updateDataDTO.player1.playerType);
 
 
-        historyGray = GameObject.Find("HistoryGray").GetComponent<SpriteRenderer>();
-        uiScript = GameObject.Find("UIDocument").GetComponent<MatchUiScript>();
+
 
 
         drawChessboard();
         gameState.turn = updateDataDTO.turn;
         gameState.nextTurn = updateDataDTO.nextTurn;
         playerType = updateDataDTO.player1.playerType;//TODO: change it for network play
-        history.Add(updateDataDTO);
-        history.get(0);
+        history.Add(updateDataDTO.turn, updateDataDTO);
 
 
         instantUpdatePieces(updateDataDTO.pieceDTOs);
@@ -120,7 +149,7 @@ public class GameManager : MonoBehaviour
         }
 
         //check mousemove
-        if (mouseX != Input.mousePosition.x || mouseY != Input.mousePosition.y && initialLoaded)
+        if (initialLoaded && mouseX != Input.mousePosition.x || mouseY != Input.mousePosition.y && initialLoaded)
         {
             mouseX = Input.mousePosition.x;
             mouseY = Input.mousePosition.y;
@@ -136,12 +165,13 @@ public class GameManager : MonoBehaviour
 
 
         // check for updates
-        if (!gameIsOver() && initialLoaded && isUpdating && (!isAnimating || Params.randomGameParams.isAutomatic))
+        if (!gameIsOver() && initialLoaded && isUpdating && (!isAnimating || isAutomatic))
         {
             timer += Time.deltaTime;
             if (timer >= updateCheckInterval)
             {
-                StartCoroutine(GameService.checkUpdate(gameState.turn + 1, UpdateMatchDataWithAnimation));
+                Debug.Log("check update " + (gameState.turn + 1));
+                StartCoroutine(GameService.checkUpdate(PlayerPrefs.GetString("gameId"), gameState.turn + 1, UpdateMatchDataWithAnimation));
                 timer = 0.0f; // Reset the timer
             }
         }
@@ -152,21 +182,22 @@ public class GameManager : MonoBehaviour
             bool finished = animator.animate(Time.deltaTime);
             if (finished)
             {
-                Debug.Log("animation finished");
+                // Debug.Log("animation finished of turn " + gameState.turn);
                 instantUpdatePieces(animator.updateData.pieceDTOs);
                 isAnimating = false;
                 animator = null;
             }
         }
-
-
-
     }
-
-
 
     private void UpdateMatchDataWithAnimation(UpdateDataDTO updateData)
     {
+        if (!initialLoaded)
+        {
+            initGame(updateData);
+            return;
+        }
+
 
 
         if (updateData.pieceDTOs == null || updateData.pieceDTOs.Length == 0 || isAnimating)
@@ -181,26 +212,36 @@ public class GameManager : MonoBehaviour
             startAnimation(updateData);
         }
 
-        if (updateData.winner != "")
-        {
-            winner = updateData.winner;
-            uiScript.writeLog("winner is " + updateData.winner);
-            StartCoroutine(SmoothlyChangeAlpha(0.4f, 0.5f));
-            return;
-        }
 
+
+        //history view for loading old games
         gameState.turn = updateData.turn;
+        matchData.turns = updateData.turn;
 
-        if (gameState.turn > gameState.maxTurns)
+        if (gameState.turn > gameState.maxLoadedTurn)
         {
-            gameState.maxTurns = gameState.turn;
-            history.Add(updateData);
+            gameState.maxLoadedTurn = gameState.turn;
+            history.Add(gameState.turn, updateData);
         }
         gameState.nextTurn = updateData.nextTurn;
+
+
+
+
         uiScript.updateTurn();
         if (isHotSeat)
         {
             playerType = updateData.nextTurn;
+        }
+
+        if (updateData.winner != "")
+        {
+
+            Debug.Log("winner is " + updateData.winner);
+            matchData.winner = updateData.winner;
+            winner = updateData.winner;
+            uiScript.writeLog("winner is " + updateData.winner);
+            StartCoroutine(SmoothlyChangeAlpha(0.4f, 0.5f));
         }
     }
 
@@ -208,11 +249,8 @@ public class GameManager : MonoBehaviour
 
     private void startAnimation(UpdateDataDTO updateData)
     {
-        Debug.Log("startAnimation");
-
         animator = new Animator(updateData, this);
         isAnimating = true;
-
     }
 
 
@@ -220,6 +258,7 @@ public class GameManager : MonoBehaviour
     // this put all positions an possibleMoves
     private void instantUpdatePieces(PieceDTO[] newPieceDTOs)
     {
+
         List<Piece> piecesToDestroy = new List<Piece>();
         List<Piece> piecesToAdd = new List<Piece>();
 
@@ -241,13 +280,7 @@ public class GameManager : MonoBehaviour
             Piece existingPiece = gameState.getPieceById(pDTO.pieceId);
             if (existingPiece != null)
             {
-
-                //Update Piece values
-                if (!existingPiece.pos.equals(pDTO.pos))
-                {
-                    movePiece(existingPiece, pDTO.pos);
-                }
-                existingPiece.moveSet = pDTO.moveSet;
+                updatePiece(existingPiece, pDTO);
             }
             else
             {
@@ -262,11 +295,30 @@ public class GameManager : MonoBehaviour
     }
 
 
+    private void updatePiece(Piece existingPiece, PieceDTO pDTO)
+    {
+        if (!existingPiece.pos.equals(pDTO.pos))
+        {
+            movePiece(existingPiece, pDTO.pos);
+        }
+        if (existingPiece.owner != pDTO.owner)
+        {
+            existingPiece.owner = pDTO.owner;
+            boardRenderer.switchOwner(existingPiece);
+        }
+        if (existingPiece.pieceTypeId != pDTO.pieceTypeId)
+        {
+            existingPiece.pieceTypeId = pDTO.pieceTypeId;
+        }
+        existingPiece.showsMoveSet = true;
+        existingPiece.moveSet = pDTO.moveSet;
+    }
+
 
 
     private void loadPieceTypes()
     {
-        StartCoroutine(GameService.loadpieceTypes(gameState.turn, updatePieceTypes));
+        StartCoroutine(GameService.loadpieceTypes(PlayerPrefs.GetString("gameId"), gameState.turn, updatePieceTypes));
     }
 
     private void updatePieceTypes(PieceTypeDTOCollection pieceTypeDTOCollection)
@@ -284,10 +336,12 @@ public class GameManager : MonoBehaviour
     }
 
 
-    private void addPiece(Piece p)
+    private void connectPiecesToView()
     {
-        gameState.addPiece(p);
-        boardRenderer.CreateAndConnectGameObject(p);
+        foreach (Piece p in gameState.pieces)
+        {
+            boardRenderer.CreateAndConnectGameObject(p);
+        }
     }
 
     private void movePiece(Piece p, Pos pos)
@@ -305,7 +359,13 @@ public class GameManager : MonoBehaviour
     private void destroy(Piece p)
     {
         gameState.destroy(p);
-        Destroy(p.gameObject);
+    }
+
+    private void addPiece(Piece p)
+    {
+        gameState.addPiece(p);
+        boardRenderer.CreateAndConnectGameObject(p);
+
     }
 
 
@@ -314,7 +374,7 @@ public class GameManager : MonoBehaviour
     {
         if (isPossibleMove(x, y))
         {
-            if (!Params.randomGameParams.isAutomatic)
+            if (!isAutomatic)
             {
                 play(x, y);
             }
@@ -383,6 +443,10 @@ public class GameManager : MonoBehaviour
         boardRenderer.removeMouseOverSelected();
         bool isOwner = mouseOverPiece.owner == playerTurn();
 
+        if (!mouseOverPiece.showsMoveSet)
+        {
+            return;
+        }
         boardRenderer.drawMouseOverPossibleMoves(
             mouseOverPiece.moveSet,
             isOwner
@@ -402,7 +466,7 @@ public class GameManager : MonoBehaviour
 
     private void play(int x, int y)
     {
-        if (gameIsOver() || isAnimating)
+        if (gameIsOver() || isAnimating || isInHistory)
         {
             return;
         }
@@ -410,12 +474,22 @@ public class GameManager : MonoBehaviour
         {
             return;
         }
+        if (playSelectedPos == null)
+        {
+            playSelectedPos = new Pos(x, y);
+            return;
+        }
+        if (!playSelectedPos.equals(new Pos(x, y)))
+        {
+            return;
+        }
 
         boardRenderer.removePossibleMoves();
         boardRenderer.removeSelected();
-        StartCoroutine(GameService.play(selectedPiece.pos, new Pos(x, y), UpdateMatchDataWithAnimation));
+        StartCoroutine(GameService.play(PlayerPrefs.GetString("gameId"), selectedPiece.pos, new Pos(x, y), UpdateMatchDataWithAnimation));
         unselectPiece(x, y);
 
+        playSelectedPos = null;
     }
 
 
@@ -521,7 +595,13 @@ public class GameManager : MonoBehaviour
 
     public void loadTurn(int turn)
     {
-        if (turn < gameState.maxTurns)
+        if (history.get(turn) == null)
+        {
+            Debug.LogError("History not found for turn " + turn);
+            return;
+        }
+
+        if (turn < gameState.maxLoadedTurn)
         {
             isUpdating = false;
             isInHistory = true;
@@ -531,15 +611,17 @@ public class GameManager : MonoBehaviour
             StartCoroutine(SmoothlyChangeAlpha(0.4f, 0.5f));
 
         }
-        else if (turn == gameState.maxTurns)
+        else if (turn == gameState.maxLoadedTurn)
         {
             isUpdating = true;
             isInHistory = false;
             gameState.turn = turn;
             instantUpdatePieces(history.get(turn).pieceDTOs);
-            StartCoroutine(SmoothlyChangeAlpha(0.0f, 0.5f));
 
+            StartCoroutine(SmoothlyChangeAlpha(0.0f, 0.5f));
         }
+
+        uiScript.updateTurn();
     }
 
     private IEnumerator SmoothlyChangeAlpha(float targetAlpha, float duration)
@@ -561,22 +643,4 @@ public class GameManager : MonoBehaviour
         historyGray.color = finalColor;
     }
 
-
-
-    IEnumerator ScaleOverTime(Transform tra, float targetScaleX, float targetScaleY, float duration)
-    {
-        Vector3 originalScale = tra.localScale;
-        Vector3 targetScale = new Vector3(targetScaleX, targetScaleY, originalScale.z);
-
-        float elapsedTime = 0f;
-
-        while (elapsedTime < duration)
-        {
-            tra.localScale = Vector3.Lerp(originalScale, targetScale, elapsedTime / duration);
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
-
-        tra.localScale = targetScale; // Ensure that the scale is exactly the target scale at the end
-    }
 }

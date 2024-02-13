@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿public abstract class Animation
+{
+    public float duration;
+    public float progressTime = 0f;
 
-    public abstract class Animation
-    {
-        public float duration;
-        public float progressTime;
+    public abstract void animate();
 
-        public abstract void animate();
-    }
+    public abstract void finish();
+}

@@ -1,31 +1,44 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameState
+public class GameState : MonoBehaviour
 {
     public Piece[,] pieces;
     public List<Piece> pieceList = new List<Piece>();
-    public int turn=0;
-    public int maxTurns=0;
+    public int turn = 0;
+    public int maxLoadedTurn = 0;
     public string nextTurn;
 
-    public GameState(int width,int height){
-        pieces = new Piece[width,height];
+    public GameState(int width, int height)
+    {
+        pieces = new Piece[width, height];
     }
 
 
-    public void addPiece(Piece p){
+    public void addPiece(Piece p)
+    {
+
         pieces[p.pos.x, p.pos.y] = p;
         pieceList.Add(p);
     }
 
-    public void movePiece(Piece p, Pos pos){
+    public void movePiece(Piece p, Pos pos)
+    {
         pieces[p.pos.x, p.pos.y] = null;
+        Piece pAtToPos = pieces[pos.x, pos.y];
+        if (pAtToPos != null)
+        {
+            //pieces[pAtToPos.pos.x, pAtToPos.pos.y] = null;
+            //pieceList.Remove(p);
+            destroy(pAtToPos);
+        }
+
         pieces[pos.x, pos.y] = p;
         p.pos.x = pos.x;
         p.pos.y = pos.y;
- 
+
+
+
     }
 
     public void swapPieces(Pos pos1, Pos pos2)
@@ -33,7 +46,7 @@ public class GameState
         Debug.Log("Swapping pieces");
         Piece p1 = pieces[pos1.x, pos1.y];
         Piece p2 = pieces[pos2.x, pos2.y];
-        if(p1==null || p2 == null)
+        if (p1 == null || p2 == null)
         {
             Debug.LogError("Tried to swap null piece");
         }
@@ -45,13 +58,16 @@ public class GameState
         p2.pos.y = pos1.y;
     }
 
-    public void destroy(Piece p){
+    public void destroy(Piece p)
+    {
+        Destroy(p.gameObject);
         pieces[p.pos.x, p.pos.y] = null;
         pieceList.Remove(p);
     }
 
-    public Piece getPiece(int i,int j){
-        return pieces[i,j];
+    public Piece getPiece(int i, int j)
+    {
+        return pieces[i, j];
     }
 
     public Piece getPiece(Pos pos)

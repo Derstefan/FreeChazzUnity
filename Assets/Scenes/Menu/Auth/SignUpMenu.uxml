@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/UnityThemes/menu.uss?fileID=7433441132597879392&amp;guid=f2491e27e3fbe0147b2f2c74d36ad7c3&amp;type=3#menu" />
+    <ui:Button text="X" display-tooltip-when-elided="true" name="quit" style="width: auto; white-space: nowrap; align-self: flex-end;" />
+    <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0);">
+        <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; align-items: center;">
+            <ui:Label tabindex="-1" text="FreeChazz signUp" display-tooltip-when-elided="true" parse-escape-sequences="true" />
+            <ui:TextField picking-mode="Ignore" name="username" placeholder-text="username" style="width: 139px;" />
+            <ui:TextField picking-mode="Ignore" name="email" placeholder-text="email" style="width: 139px;" />
+            <ui:TextField picking-mode="Ignore" name="password" password="true" placeholder-text="password" hide-placeholder-on-focus="true" style="width: 139px;" />
+            <ui:TextField picking-mode="Ignore" name="passwordAgain" password="true" placeholder-text="password again" hide-placeholder-on-focus="true" style="width: 139px;" />
+            <ui:Label tabindex="-1" text="signUp error" display-tooltip-when-elided="true" name="errorMessage" style="color: rgb(166, 83, 2); display: none;" />
+            <ui:Button text="signUp" display-tooltip-when-elided="true" name="signUp" />
+            <ui:Label tabindex="-1" text="login" display-tooltip-when-elided="true" name="login" parse-escape-sequences="false" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

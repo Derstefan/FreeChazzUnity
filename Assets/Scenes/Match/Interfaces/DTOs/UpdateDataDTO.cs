@@ -1,24 +1,22 @@
 #nullable enable
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 [Serializable]
-    public class UpdateDataDTO
-    {
-        public String gameId;
-        public PlayerDTO player1;
-        public PlayerDTO player2;
-        public int width;
-        public int height;
-        public int turn;
-        public string nextTurn;
-        public string lastActionTime;
-        public string winner;
-        public bool draw;
-        public PieceDTO[] pieceDTOs;
-        public DrawEventDTO drawEvent;
+public class UpdateDataDTO
+{
+    public String gameId;
+    public PlayerDTO player1;
+    public PlayerDTO player2;
+    public int width;
+    public int height;
+    public int turn;
+    public int maxTurn;
+    public string nextTurn;
+    public string lastActionTime;
+    public string winner;
+    public bool draw;
+    public PieceDTO[] pieceDTOs;
+    public DrawEventDTO drawEvent;
 
     /*  
     public static UpdateDataDTO mockUpdateData1 = new UpdateDataDTO

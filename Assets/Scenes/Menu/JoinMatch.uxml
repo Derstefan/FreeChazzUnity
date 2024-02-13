@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/UnityThemes/menu.uss?fileID=7433441132597879392&amp;guid=f2491e27e3fbe0147b2f2c74d36ad7c3&amp;type=3#menu" />
+    <ui:VisualElement name="VisualElement" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); height: auto; max-height: 10%;">
+        <ui:Button text="back" display-tooltip-when-elided="true" name="menu" style="align-self: flex-start;" />
+    </ui:VisualElement>
+    <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; align-items: center; flex-direction: row; max-height: 5%; display: flex;">
+        <ui:TextField picking-mode="Ignore" name="gameId" is-delayed="false" focusable="true" placeholder-text="gameId" style="max-width: 20%; display: flex; visibility: visible; height: 48px; width: 317px;" />
+    </ui:VisualElement>
+    <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); justify-content: center; align-items: center; flex-direction: row; max-height: 20%;">
+        <ui:Button name="join" text="Join" parse-escape-sequences="false" style="margin-right: 10px; font-size: 25px; height: 57px; width: 206px;" />
+    </ui:VisualElement>
+</ui:UXML>

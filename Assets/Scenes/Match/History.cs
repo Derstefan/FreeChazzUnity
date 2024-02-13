@@ -1,13 +1,21 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class History
 {
-    private List<UpdateDataDTO> history = new List<UpdateDataDTO>();
+    private Dictionary<int, UpdateDataDTO> history = new Dictionary<int, UpdateDataDTO>();
+
+    public void Add(int turn, UpdateDataDTO updateData)
+    {
+        history.Add(turn, updateData);
+    }
 
     public void Add(UpdateDataDTO updateData)
     {
-        history.Add(updateData);
 
+        Debug.Log("Adding update data to history " + updateData.turn);
+
+        history.Add(updateData.turn, updateData);
     }
 
 

@@ -17,7 +17,6 @@
         public bool isBotEnemy;
         public bool isNetworkGame;
         public bool isAutomatic;
-        public bool isPublic;
 
         public string ToString()
         {
@@ -29,7 +28,6 @@
                    ", isBotEnemy=" + isBotEnemy +
                    ", isNetworkGame=" + isNetworkGame +
                    ", isAutomatic=" + isAutomatic +
-                   ", isPublic=" + isPublic +
                    '}';
         }
     }

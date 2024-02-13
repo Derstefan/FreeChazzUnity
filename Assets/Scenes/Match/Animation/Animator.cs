@@ -9,6 +9,8 @@ public class Animator
 
     public float progressTime = 0f;
 
+    public float duration;
+
     public UpdateDataDTO updateData;
 
     public Animator(UpdateDataDTO updateData, GameManager gameManager)
@@ -19,24 +21,21 @@ public class Animator
         {
             //create animation for each event 
             EventDTO eventDTO = updateData.drawEvent.events[i];
+
+            Animation animation = null;
             switch (eventDTO.type)
             {
                 case "MOVE":
-                    animations.Add(new MovementAnimation(gameManager.getPieceById(eventDTO.pieceId),
-                        (eventDTO.fromPos.invertY().GetVector3(-10f) + new Vector3(0.5f, -0.5f, -10f)) * gameManager.size,
-                        (eventDTO.toPos.invertY().GetVector3(-10f) + new Vector3(0.5f, -0.5f, -10f)) * gameManager.size));
+                    animation = new MovementAnimation(gameManager, eventDTO);
                     break;
                 case "DESTROY":
-                    animations.Add(new DestroyAnimation(gameManager.getPieceById(eventDTO.pieceId), gameManager.size));
+                    animation = new DestroyAnimation(gameManager, eventDTO);
                     break;
                 case "SWAP":
-                    animations.Add(new SwapAnimation(gameManager, eventDTO));
+                    animation = new SwapAnimation(gameManager, eventDTO);
                     break;
                 case "MOVEANDDESTROY":
-                    animations.Add(new MoveAndDestroyAnimation(gameManager.getPieceById(eventDTO.pieceId),
-                       (eventDTO.fromPos.invertY().GetVector3(-10f) + new Vector3(0.5f, -0.5f, -10f)) * gameManager.size,
-                       (eventDTO.toPos.invertY().GetVector3(-10f) + new Vector3(0.5f, -0.5f, -10f)) * gameManager.size,
-                       gameManager.getPieceById(eventDTO.targetPieceId), gameManager.size));
+                    animation = new MoveAndDestroyAnimation(gameManager, eventDTO);
                     break;
                 default:
                     // animations[i] = new DestroyAnimation(piece);
@@ -44,19 +43,25 @@ public class Animator
                     //TODO: other cases
                     break;
             }
+            if (animation != null)
+            {
+                duration += animation.duration;
+                animations.Add(animation);
+            }
+
 
         }
+
+        Debug.Log("start animation with " + duration);
     }
 
     public bool animate(float delta)
     {
-        if (currentAnimationIndex >= animations.Count)
-        {
-            return true; //Animations finished
-        }
+
         Animation animation = animations[currentAnimationIndex];
 
-
+        animation.progressTime += delta;
+        progressTime += delta;
 
         if (animation.progressTime <= animation.duration)
         {
@@ -64,9 +69,17 @@ public class Animator
         }
         else
         {
+            animation.finish();
             currentAnimationIndex++;
+            if (currentAnimationIndex >= animations.Count)
+            {
+                Debug.Log(progressTime + " time");
+                return true; //Animations finished
+            }
+            animations[currentAnimationIndex].progressTime += animation.progressTime - animation.duration;
         }
-        animation.progressTime += delta;
+
+
 
         return false; // not finished
     }

@@ -17,6 +17,8 @@ public class MatchUiScript : MonoBehaviour
     private VisualElement legendView;
     private VisualElement pieceCard;
 
+    private Label gameIdLabel;
+
 
     private VisualElement modal;
     private void OnEnable()
@@ -31,6 +33,7 @@ public class MatchUiScript : MonoBehaviour
 
         label = root.Q<UnityEngine.UIElements.Label>("turn");
         label2 = root.Q<UnityEngine.UIElements.Label>("log");
+        gameIdLabel = root.Q<Label>("gameId");
 
 
         pieceView = root.Q<VisualElement>("pieceView");
@@ -56,34 +59,31 @@ public class MatchUiScript : MonoBehaviour
         if (gameManager.gameState.turn > 0)
         {
             gameManager.loadTurn(gameManager.gameState.turn - 1);
-            updateTurn();
         }
     }
 
     private void nextTurn()
     {
-        if (gameManager.gameState.turn < gameManager.gameState.maxTurns)
+        if (gameManager.gameState.turn < gameManager.gameState.maxLoadedTurn)
         {
             gameManager.loadTurn(gameManager.gameState.turn + 1);
-            updateTurn();
         }
     }
 
     private void jumpToCurrentTurn()
     {
-        gameManager.loadTurn(gameManager.gameState.maxTurns);
-        updateTurn();
+        gameManager.loadTurn(gameManager.gameState.maxLoadedTurn);
     }
 
     public void updateTurn()
     {
-        if (gameManager.gameState.turn == gameManager.gameState.maxTurns)
+        if (gameManager.gameState.turn == gameManager.gameState.maxLoadedTurn)
         {
             label.text = "Turn " + gameManager.gameState.turn;
         }
         else
         {
-            label.text = "Turn " + gameManager.gameState.turn + "/" + gameManager.gameState.maxTurns;
+            label.text = "Turn " + gameManager.gameState.turn + "/" + gameManager.gameState.maxLoadedTurn;
         }
     }
 
@@ -99,12 +99,16 @@ public class MatchUiScript : MonoBehaviour
         pieceCard.style.opacity = 0;
     }
 
+    public void setGameId(string gameId)
+    {
+        gameIdLabel.text = "Game ID: " + gameId;
+    }
 
 
     public void showPiece(Piece piece, PieceTypeDTO pieceTypeDTO)
     {
         pieceCard.style.opacity = 1;
-        Texture2D renderedPiece = PieceRenderer.render(pieceTypeDTO.pieceTypeId, 5f, piece.owner == "P1");
+        Texture2D renderedPiece = PieceRenderer.generateTexture(5f, pieceTypeDTO.pieceTypeId, piece.owner == "P1");
 
         actionView.Clear();
         legendView.Clear();
@@ -117,17 +121,15 @@ public class MatchUiScript : MonoBehaviour
         VisualElement piecePos = new VisualElement();
         piecePos.style.position = Position.Absolute;
         piecePos.style.left = 0 * actionFiledSize + xOffset;
-        piecePos.style.top = (6 - 0) * actionFiledSize;
+
+        piecePos.style.top = (6) * actionFiledSize;
+
+
         piecePos.style.width = actionElementSize;
         piecePos.style.height = actionElementSize;
-
-        // Customize the element's appearance (e.g., setting background color)
         piecePos.style.backgroundColor = Color.green;
-
-        // Add the element to the hierarchy (assuming you have a parent container)
         actionView.Add(piecePos);
 
-        //list of strings
         List<string> differentActions = new List<string>();
 
         foreach (ActionDTO action in pieceTypeDTO.actions)
@@ -135,7 +137,13 @@ public class MatchUiScript : MonoBehaviour
             VisualElement element = new VisualElement();
             element.style.position = Position.Absolute;
             element.style.left = action.vec.x * actionFiledSize + xOffset;
-            element.style.top = (6 - action.vec.y) * actionFiledSize;
+
+            // Mirror vertically if the piece owner is P2
+            if (piece.owner == "P1")
+                element.style.top = (6 - action.vec.y) * actionFiledSize;
+            else
+                element.style.top = (6 + action.vec.y) * actionFiledSize; // mirror vertically
+
             element.style.width = actionElementSize;
             element.style.height = actionElementSize;
             element.RegisterCallback<MouseEnterEvent>(e =>
@@ -148,13 +156,8 @@ public class MatchUiScript : MonoBehaviour
                 Debug.Log("Mouse left the element.");
             });
 
-            // Customize the element's appearance (e.g., setting background color)
             element.style.backgroundColor = RenderUtil.getColorByType(action.type);
-
-            // Add the element to the hierarchy (assuming you have a parent container)
             actionView.Add(element);
-            // Store the element in the 2D array
-
 
             if (!differentActions.Contains(action.type))
             {
@@ -167,11 +170,8 @@ public class MatchUiScript : MonoBehaviour
             }
         }
 
-
         pieceView.style.backgroundImage = renderedPiece;
-
-
-
     }
+
 
 }

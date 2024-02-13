@@ -43,4 +43,13 @@ public class Pos
     {
         return "(" + x + "," + y + ")";
     }
+
+
+    public static float distance(Pos p1, Pos p2)
+    {
+        Vector3 position1 = new Vector3(p1.x, p1.y);
+        Vector3 position2 = new Vector3(p2.x, p2.y);
+
+        return Vector3.Distance(position1, position2);
+    }
 }
